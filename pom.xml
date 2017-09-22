@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>phone-home-client</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1-SNAPSHOT</version>
 
   <name>Phone Home Client</name>
   <description>A client to allow integrations to phone home using the common phone-home-api.</description>
