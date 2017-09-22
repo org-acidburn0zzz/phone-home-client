@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.blackducksoftware.integration</groupId>
+    <artifactId>common-maven-parent</artifactId>
+    <version>4.0.0</version>
+  </parent>
+
+  <artifactId>phone-home-client</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>Phone Home Client</name>
+  <description>A client to allow integrations to phone home using the common phone-home-api.</description>
+  <url>https://www.github.com/blackducksoftware/phone-home-client</url>
+  <inceptionYear>2017</inceptionYear>
+
+  <scm>
+    <connection>scm:git:git://github.com/blackducksoftware/phone-home-client.git/</connection>
+    <developerConnection>scm:git:git@github.com:blackducksoftware/phone-home-client.git</developerConnection>
+    <url>https://www.github.com/blackducksoftware/phone-home-client</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.blackducksoftware.integration</groupId>
+      <artifactId>hub-common-rest</artifactId>
+      <version>2.4.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.blackducksoftware.integration</groupId>
+      <artifactId>phone-home-api</artifactId>
+      <version>5.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <version>3.10.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
