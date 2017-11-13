@@ -42,7 +42,7 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection;
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntBufferedLogger;
 import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEnum;
@@ -64,10 +64,8 @@ public class PhoneHomeClientUnitTest {
     private final int port = msRule.getPort();
 
     @Before
-    public void startProxy(){
-        msClient
-        .when(new HttpRequest().withPath("/test"))
-        .respond(new HttpResponse().withHeader(new Header("Content-Type", "json")));
+    public void startProxy() {
+        msClient.when(new HttpRequest().withPath("/test")).respond(new HttpResponse().withHeader(new Header("Content-Type", "json")));
     }
 
     @After
@@ -78,9 +76,13 @@ public class PhoneHomeClientUnitTest {
     @Test
     public void callHomeInvalidUrl() throws Exception {
         exception.expect(PhoneHomeException.class);
-        final String targetUrl = "http://example.com:"+this.port+"/test";
+        final String targetUrl = "http://example.com:" + this.port + "/test";
         final URL url = new URL(targetUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(new IntBufferedLogger(), url, TIMEOUT);
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(new IntBufferedLogger());
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
 
         final String regId = "regId";
@@ -93,9 +95,13 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeValidUrl() throws Exception {
-        final String targetUrl = "http://"+LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
         final URL url = new URL(targetUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(new IntBufferedLogger(), url, TIMEOUT);
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(new IntBufferedLogger());
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
         final String regId = "regId";
         final PhoneHomeSource source = PhoneHomeSource.INTEGRATIONS;
@@ -107,9 +113,13 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeIntegrationsTest() throws Exception {
-        final String targetUrl = "http://"+LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
         final URL url = new URL(targetUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(new IntBufferedLogger(), url, TIMEOUT);
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(new IntBufferedLogger());
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
@@ -128,9 +138,13 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeIntegrationsTestWithHostName() throws Exception {
-        final String targetUrl = "http://"+LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
         final URL url = new URL(targetUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(new IntBufferedLogger(), url, TIMEOUT);
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(new IntBufferedLogger());
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
@@ -153,36 +167,36 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeException exceptionException = new PhoneHomeException(emptyException);
         final PhoneHomeException messageException = new PhoneHomeException("message");
         final PhoneHomeException exceptionAndMessageException = new PhoneHomeException("message", emptyException);
-        for(final PhoneHomeException phoneHomeException : new PhoneHomeException[]{emptyException, exceptionException, messageException, exceptionAndMessageException}){
-            try{
+        for (final PhoneHomeException phoneHomeException : new PhoneHomeException[] { emptyException, exceptionException, messageException, exceptionAndMessageException }) {
+            try {
                 throw phoneHomeException;
-            }catch(final PhoneHomeException e){
-                //Do nothing
+            } catch (final PhoneHomeException e) {
+                // Do nothing
             }
         }
     }
 
     @Test
-    public void testPostBadPhoneHomeRequestBuilding() throws Exception{
+    public void testPostBadPhoneHomeRequestBuilding() throws Exception {
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
-        try{
+        try {
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
-        }catch(final IllegalStateException e){
-            //Do nothing
+        } catch (final IllegalStateException e) {
+            // Do nothing
         }
-        try{
+        try {
             phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
             phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.ARTIFACTORY);
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
-        }catch(final IllegalStateException e){
-            //Do nothing
+        } catch (final IllegalStateException e) {
+            // Do nothing
         }
     }
 
     @Test
-    public void validatePhoneHomeRequestBuilding() throws Exception{
+    public void validatePhoneHomeRequestBuilding() throws Exception {
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
         phoneHomeRequestBuilder.setRegistrationId("regKey");
         phoneHomeRequestBuilder.setHostName(null);
@@ -213,23 +227,26 @@ public class PhoneHomeClientUnitTest {
     }
 
     @Test
-    public void validateBadPhoneHomeBackend() throws Exception{
+    public void validateBadPhoneHomeBackend() throws Exception {
         final PhoneHomeClient phClient = new PhoneHomeClient(null, null, null);
-        try{
+        try {
             phClient.postPhoneHomeRequest(null);
             fail("Phone home exception not thrown");
-        }catch(final PhoneHomeException e){
-            //Do nothing
+        } catch (final PhoneHomeException e) {
+            // Do nothing
         }
     }
 
     @Test
-    public void constructPhoneHomeClientWithoutUrl() throws Exception{
-        final String targetUrl = "http://example.com:"+this.port+"/test";
-        final URL url = new URL(targetUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(new IntBufferedLogger(), url, TIMEOUT);
+    public void constructPhoneHomeClientWithoutUrl() throws Exception {
+        final String targetUrl = "http://example.com:" + this.port + "/test";
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(new IntBufferedLogger());
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
         new PhoneHomeClient(new IntBufferedLogger(), restConnection);
-        //Cannot test this meaningfully without phoning home to an actual server, which is bad.
+        // Cannot test this meaningfully without phoning home to an actual server, which is bad.
     }
 
 }

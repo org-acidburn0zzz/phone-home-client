@@ -29,7 +29,7 @@ import java.net.URL;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.request.HubRequest;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection;
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 
@@ -60,13 +60,14 @@ public class PhoneHomeClient {
             throw new PhoneHomeException("No phone home server found.");
         }
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(logger, phoneHomeBackendUrl, baseConnection.timeout);
-        restConnection.proxyHost = baseConnection.proxyHost;
-        restConnection.proxyPort = baseConnection.proxyPort;
-        restConnection.proxyNoHosts = baseConnection.proxyNoHosts;
-        restConnection.proxyUsername = baseConnection.proxyUsername;
-        restConnection.proxyPassword = baseConnection.proxyPassword;
-        restConnection.alwaysTrustServerCertificate = baseConnection.alwaysTrustServerCertificate;
+
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(logger);
+        builder.setBaseUrl(phoneHomeBackendUrl.toString());
+        builder.setTimeout(baseConnection.timeout);
+        builder.applyProxyInfo(baseConnection.getProxyInfo());
+        builder.setAlwaysTrustServerCertificate(baseConnection.alwaysTrustServerCertificate);
+        final RestConnection restConnection = builder.build();
         final HubRequest request = new HubRequest(restConnection);
         try {
             request.executePost(restConnection.gson.toJson(phoneHomeRequestBody));
