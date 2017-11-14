@@ -38,7 +38,7 @@ import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEn
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
 import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
-public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeRequestBody>{
+public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeRequestBody> {
     private String registrationId;
     private String hostName;
     private String blackDuckName;
@@ -91,10 +91,9 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
         return metaDataMap;
     }
 
-    public void addToMetaDataMap(final String key, final String value){
+    public void addToMetaDataMap(final String key, final String value) {
         metaDataMap.put(key, value);
     }
-
 
     public String getRegistrationId() {
         return registrationId;
