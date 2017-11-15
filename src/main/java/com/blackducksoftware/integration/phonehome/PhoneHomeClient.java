@@ -42,7 +42,7 @@ public class PhoneHomeClient {
     private final ProxyInfo proxyInfo;
     private final boolean alwaysTrustServerCertificate;
 
-    public PhoneHomeClient(final IntLogger logger, final int timeout, final boolean alwaysTrustServerCertificate) {
+    public PhoneHomeClient(final IntLogger logger, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
         try {
             this.phoneHomeBackendUrl = new URL(PHONE_HOME_BACKEND);
@@ -50,7 +50,7 @@ public class PhoneHomeClient {
             phoneHomeBackendUrl = null;
         }
         this.timeout = timeout;
-        this.proxyInfo = ProxyInfo.NO_PROXY_INFO;
+        this.proxyInfo = proxyInfo;
         this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
