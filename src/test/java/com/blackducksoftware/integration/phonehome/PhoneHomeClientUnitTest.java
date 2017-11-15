@@ -83,7 +83,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
+        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
         final String regId = "regId";
         final PhoneHomeSource source = PhoneHomeSource.INTEGRATIONS;
@@ -102,7 +102,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
+        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
         final String regId = "regId";
         final PhoneHomeSource source = PhoneHomeSource.INTEGRATIONS;
         final Map<String, String> infoMap = new HashMap<>();
@@ -120,7 +120,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
+        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
         phoneHomeRequestBuilder.setRegistrationId("regKey");
@@ -145,7 +145,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection);
+        final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
         phoneHomeRequestBuilder.setRegistrationId(null);
@@ -228,7 +228,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void validateBadPhoneHomeBackend() throws Exception {
-        final PhoneHomeClient phClient = new PhoneHomeClient(null, null, null);
+        final PhoneHomeClient phClient = new PhoneHomeClient(null, null, 0, null, false);
         try {
             phClient.postPhoneHomeRequest(null);
             fail("Phone home exception not thrown");
@@ -245,7 +245,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        new PhoneHomeClient(new IntBufferedLogger(), restConnection);
+        new PhoneHomeClient(new IntBufferedLogger(), restConnection.hubBaseUrl, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
         // Cannot test this meaningfully without phoning home to an actual server, which is bad.
     }
 
