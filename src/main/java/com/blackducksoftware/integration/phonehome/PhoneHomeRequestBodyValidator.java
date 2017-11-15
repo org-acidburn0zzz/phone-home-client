@@ -31,7 +31,7 @@ import com.blackducksoftware.integration.validator.ValidationResult;
 import com.blackducksoftware.integration.validator.ValidationResultEnum;
 import com.blackducksoftware.integration.validator.ValidationResults;
 
-public class PhoneHomeRequestBodyValidator extends AbstractValidator{
+public class PhoneHomeRequestBodyValidator extends AbstractValidator {
     private String registrationId;
     private String hostName;
     private String blackDuckName;
@@ -52,47 +52,39 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator{
         return result;
     }
 
-    public void validateHubServerIdentifier(final ValidationResults result){
+    public void validateHubServerIdentifier(final ValidationResults result) {
         if (StringUtils.isBlank(registrationId) && StringUtils.isBlank(hostName)) {
-            result.addResult(PhoneHomeRequestFieldEnum.REGID,
-                    new ValidationResult(ValidationResultEnum.ERROR, "No Hub server identifier was found."));
+            result.addResult(PhoneHomeRequestFieldEnum.REGID, new ValidationResult(ValidationResultEnum.ERROR, "No Hub server identifier was found."));
         }
     }
 
-    public void validateBlackDuckProductInfo(final ValidationResults result){
+    public void validateBlackDuckProductInfo(final ValidationResults result) {
         if (blackDuckName == null || StringUtils.isBlank(blackDuckName)) {
-            result.addResult(PhoneHomeRequestFieldEnum.BLACKDUCKNAME,
-                    new ValidationResult(ValidationResultEnum.ERROR, "No Black Duck product name was found."));
-        }else if (StringUtils.isBlank(blackDuckVersion)) {
-            result.addResult(PhoneHomeRequestFieldEnum.BLACKDUCKVERSION,
-                    new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", blackDuckName)));
+            result.addResult(PhoneHomeRequestFieldEnum.BLACKDUCKNAME, new ValidationResult(ValidationResultEnum.ERROR, "No Black Duck product name was found."));
+        } else if (StringUtils.isBlank(blackDuckVersion)) {
+            result.addResult(PhoneHomeRequestFieldEnum.BLACKDUCKVERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", blackDuckName)));
         }
     }
 
-    public void validateThirdPartyProductInfo(final ValidationResults result){
+    public void validateThirdPartyProductInfo(final ValidationResults result) {
         if (thirdPartyName == null || StringUtils.isBlank(thirdPartyName)) {
-            result.addResult(PhoneHomeRequestFieldEnum.THIRDPARTYNAME,
-                    new ValidationResult(ValidationResultEnum.ERROR, "No third party name was found."));
+            result.addResult(PhoneHomeRequestFieldEnum.THIRDPARTYNAME, new ValidationResult(ValidationResultEnum.ERROR, "No third party name was found."));
         } else if (StringUtils.isBlank(thirdPartyVersion)) {
-            result.addResult(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION,
-                    new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", thirdPartyName)));
+            result.addResult(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", thirdPartyName)));
         }
     }
 
-    public void validateIntegrationInfo(final ValidationResults result){
+    public void validateIntegrationInfo(final ValidationResults result) {
         if (StringUtils.isBlank(pluginVersion)) {
-            result.addResult(PhoneHomeRequestFieldEnum.PLUGINVERSION,
-                    new ValidationResult(ValidationResultEnum.ERROR, "No plugin version was found."));
+            result.addResult(PhoneHomeRequestFieldEnum.PLUGINVERSION, new ValidationResult(ValidationResultEnum.ERROR, "No plugin version was found."));
         }
     }
 
-    public void validateSource(final ValidationResults result){
+    public void validateSource(final ValidationResults result) {
         if (source == null || StringUtils.isBlank(source)) {
-            result.addResult(PhoneHomeRequestFieldEnum.PLUGINVERSION,
-                    new ValidationResult(ValidationResultEnum.ERROR, "No source was found."));
+            result.addResult(PhoneHomeRequestFieldEnum.PLUGINVERSION, new ValidationResult(ValidationResultEnum.ERROR, "No source was found."));
         }
     }
-
 
     public void setRegistrationId(final String registrationId) {
         this.registrationId = registrationId;

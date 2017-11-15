@@ -27,9 +27,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.request.HubRequest;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection;
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 
@@ -37,22 +38,28 @@ public class PhoneHomeClient {
     public static final String PHONE_HOME_BACKEND = "https://collect.blackducksoftware.com";
     private final IntLogger logger;
     private URL phoneHomeBackendUrl;
-    private final RestConnection baseConnection;
+    private final int timeout;
+    private final ProxyInfo proxyInfo;
+    private final boolean alwaysTrustServerCertificate;
 
-    public PhoneHomeClient(final IntLogger logger, final RestConnection restConnection) {
+    public PhoneHomeClient(final IntLogger logger, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
         try {
             this.phoneHomeBackendUrl = new URL(PHONE_HOME_BACKEND);
         } catch (final MalformedURLException e) {
             phoneHomeBackendUrl = null;
         }
-        this.baseConnection = restConnection;
+        this.timeout = timeout;
+        this.proxyInfo = proxyInfo;
+        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
-    public PhoneHomeClient(final IntLogger logger, final URL phoneHomeBackendUrl, final RestConnection restConnection) {
+    public PhoneHomeClient(final IntLogger logger, final URL phoneHomeBackendUrl, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
         this.phoneHomeBackendUrl = phoneHomeBackendUrl;
-        this.baseConnection = restConnection;
+        this.timeout = timeout;
+        this.proxyInfo = proxyInfo;
+        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody) throws PhoneHomeException {
@@ -60,13 +67,14 @@ public class PhoneHomeClient {
             throw new PhoneHomeException("No phone home server found.");
         }
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(logger, phoneHomeBackendUrl, baseConnection.timeout);
-        restConnection.proxyHost = baseConnection.proxyHost;
-        restConnection.proxyPort = baseConnection.proxyPort;
-        restConnection.proxyNoHosts = baseConnection.proxyNoHosts;
-        restConnection.proxyUsername = baseConnection.proxyUsername;
-        restConnection.proxyPassword = baseConnection.proxyPassword;
-        restConnection.alwaysTrustServerCertificate = baseConnection.alwaysTrustServerCertificate;
+
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.setLogger(logger);
+        builder.setBaseUrl(phoneHomeBackendUrl.toString());
+        builder.setTimeout(timeout);
+        builder.applyProxyInfo(proxyInfo);
+        builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
+        final RestConnection restConnection = builder.build();
         final HubRequest request = new HubRequest(restConnection);
         try {
             request.executePost(restConnection.gson.toJson(phoneHomeRequestBody));
