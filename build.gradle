@@ -1,0 +1,18 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+    dependencies { classpath 'com.blackducksoftware.integration:common-gradle-plugin:0.0.+' }
+}
+
+version = '1.0.0-SNAPSHOT'
+
+apply plugin: 'com.blackducksoftware.integration.library'
+
+dependencies {
+    compile 'com.blackducksoftware.integration:hub-common-rest:3.0.0'
+    compile 'com.blackducksoftware.integration:phone-home-api:5.0.0'
+    testCompile 'org.mock-server:mockserver-netty:3.10.4'
+}
