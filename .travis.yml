@@ -1,5 +1,14 @@
 language: java
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "Sa6aYwu2z4xl2eoI0uFHLc1+4fSf5SfM+iEcCdvUpso6qMmooojDaRvYDnCwU7pSwuyCh7mpt64vowg4nPMkGLZVpZZ7u3g1mXbZHNQleytfc8B2AQ/0HFzK9Pln9YB3N8IciNpDD3WQhSNYEnvD/96hxw3kKIDfItmuTSU0V/edRZkHaQAHkKTXPdFW4UuIHGaZN2Ouz4toCqvtcneTu/FQ4aEgT+7A0HtqX1dlPWGlWIr9ZKBBg8zmMJypzD3CeYUZ8ep0C336UDoFKGM+KEXciE4ynerIFVxBGbxAC7laJNZNUa+blOxV0oJaXn37zc4Ft9iNmIZhE+lGG0KtL1hw/QRz49ODPjFu3QaLydstwJjxu/V5ZiWyDXXxG8JsKbrE1CYDcMlpjM5A2dMV7y7DVZASBmTECj398BSLWEdPLU4Yc2o4PJi515JDhymbUpQfJ3PMxUKAcIP1eYUaX2ZJcNYpEY+xu8mE4GmepfAflYJykYf7mTSXjl1p4bb5whjE1mvO0sY2bIyRVwGBOPEo3S0ia7mMUAeHkYD26BoPbmrgmJ9XX2sJ7xJkyZxl/JIP5t4fJ946qhZcDI0puJk+6l4lxGNYZRquK6i11A88nStadNwu/EBkT1kZUBYb/6LLklIQl4zPr1z7EPA4W2uX4l5eUcES/7tT8xdEUhg="
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
 jdk:
   - oraclejdk8
 
@@ -12,6 +21,13 @@ notifications:
       - ekerwin@blackducksoftware.com
 
 install: true
+
+addons:
+  coverity_scan:
+    project:
+      name: "blackducksoftware/phone-home-client"
+    build_command: ./gradlew clean build --no-daemon
+    branch_pattern: coverity_scan
 
 script:
   - ./gradlew clean build
