@@ -23,12 +23,15 @@
  */
 package com.blackducksoftware.integration.phonehome;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.request.HubRequest;
+import com.blackducksoftware.integration.hub.request.Request;
+import com.blackducksoftware.integration.hub.request.Response;
+import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -75,11 +78,14 @@ public class PhoneHomeClient {
         builder.applyProxyInfo(proxyInfo);
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
-        final HubRequest request = new HubRequest(restConnection);
-        try {
-            request.executePost(restConnection.gson.toJson(phoneHomeRequestBody));
+
+        final Request request = new Request(phoneHomeBackendUrl.toString(), null, null, HttpMethod.POST, null, null, null);
+        request.setBodyContent(restConnection.gson.toJson(phoneHomeRequestBody));
+        try (Response response = restConnection.executeRequest(request)) {
         } catch (final IntegrationException e) {
             throw new PhoneHomeException(e.getMessage(), e);
+        } catch (final IOException io) {
+            throw new PhoneHomeException(io.getMessage(), io);
         }
     }
 

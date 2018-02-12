@@ -245,7 +245,7 @@ public class PhoneHomeClientUnitTest {
         builder.setBaseUrl(targetUrl);
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
-        new PhoneHomeClient(new IntBufferedLogger(), restConnection.hubBaseUrl, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
+        new PhoneHomeClient(new IntBufferedLogger(), restConnection.baseUrl, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
         // Cannot test this meaningfully without phoning home to an actual server, which is bad.
     }
 
