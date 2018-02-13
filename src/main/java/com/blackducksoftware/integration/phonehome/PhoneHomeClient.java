@@ -30,6 +30,7 @@ import java.net.URL;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.request.Request;
+import com.blackducksoftware.integration.hub.request.RequestWrapper;
 import com.blackducksoftware.integration.hub.request.Response;
 import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
@@ -78,14 +79,14 @@ public class PhoneHomeClient {
         builder.applyProxyInfo(proxyInfo);
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
-
-        final Request request = new Request(phoneHomeBackendUrl.toString(), null, null, HttpMethod.POST, null, null, null);
-        request.setBodyContent(restConnection.gson.toJson(phoneHomeRequestBody));
-        try (Response response = restConnection.executeRequest(request)) {
+        try {
+            final Request request = new RequestWrapper(HttpMethod.POST).setBodyContentObject(phoneHomeRequestBody).createUpdateRequest(phoneHomeBackendUrl.toString());
+            try (Response response = restConnection.executeRequest(request)) {
+            } catch (final IOException io) {
+                throw new PhoneHomeException(io.getMessage(), io);
+            }
         } catch (final IntegrationException e) {
             throw new PhoneHomeException(e.getMessage(), e);
-        } catch (final IOException io) {
-            throw new PhoneHomeException(io.getMessage(), io);
         }
     }
 
