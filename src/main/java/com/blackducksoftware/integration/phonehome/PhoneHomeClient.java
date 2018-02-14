@@ -80,7 +80,7 @@ public class PhoneHomeClient {
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
         try {
-            final Request request = new RequestWrapper(HttpMethod.POST).setBodyContentObject(phoneHomeRequestBody).createUpdateRequest(phoneHomeBackendUrl.toString());
+            final Request request = new RequestWrapper(HttpMethod.POST).setBodyContentObject(phoneHomeRequestBody).createRequest(phoneHomeBackendUrl.toString());
             try (Response response = restConnection.executeRequest(request)) {
             } catch (final IOException io) {
                 throw new PhoneHomeException(io.getMessage(), io);
