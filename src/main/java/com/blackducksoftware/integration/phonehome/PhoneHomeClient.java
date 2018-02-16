@@ -29,8 +29,8 @@ import java.net.URL;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
+import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
-import com.blackducksoftware.integration.hub.request.RequestWrapper;
 import com.blackducksoftware.integration.hub.request.Response;
 import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
@@ -80,7 +80,7 @@ public class PhoneHomeClient {
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
         try {
-            final Request request = new RequestWrapper(HttpMethod.POST).setBodyContentObject(phoneHomeRequestBody).createRequest(phoneHomeBackendUrl.toString());
+            final Request request = new Request.Builder(phoneHomeBackendUrl.toString()).method(HttpMethod.POST).bodyContent(new BodyContent(phoneHomeRequestBody)).build();
             try (Response response = restConnection.executeRequest(request)) {
             } catch (final IOException io) {
                 throw new PhoneHomeException(io.getMessage(), io);
