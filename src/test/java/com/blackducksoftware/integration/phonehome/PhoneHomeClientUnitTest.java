@@ -44,11 +44,13 @@ import org.mockserver.model.HttpResponse;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntBufferedLogger;
+import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEnum;
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
 import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
+import com.blackducksoftware.integration.util.CIEnvironmentVariables;
 
 public class PhoneHomeClientUnitTest {
     @Rule
@@ -90,7 +92,7 @@ public class PhoneHomeClientUnitTest {
         final Map<String, String> infoMap = new HashMap<>();
         final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, source.getName(), infoMap);
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
     }
 
     @Test
@@ -108,7 +110,7 @@ public class PhoneHomeClientUnitTest {
         final Map<String, String> infoMap = new HashMap<>();
         final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, source.getName(), infoMap);
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
     }
 
     @Test
@@ -133,7 +135,7 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
     }
 
     @Test
@@ -158,7 +160,43 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
+    }
+
+    @Test
+    public void callHomeSkip() throws Exception {
+        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
+        final URL url = new URL(targetUrl);
+        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+
+        final IntBufferedLogger bufferedLogger = new IntBufferedLogger();
+        builder.setLogger(bufferedLogger);
+        builder.setBaseUrl(targetUrl);
+        builder.setTimeout(TIMEOUT);
+        final RestConnection restConnection = builder.build();
+        final PhoneHomeClient phClient = new PhoneHomeClient(bufferedLogger, url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
+
+        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        phoneHomeRequestBuilder.setRegistrationId(null);
+        phoneHomeRequestBuilder.setHostName("hostName");
+        phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
+        phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
+        phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
+        phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.JENKINS);
+        phoneHomeRequestBuilder.setThirdPartyVersion("thirdPartyVersion");
+        phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
+        final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
+
+        final CIEnvironmentVariables environmentVariables = new CIEnvironmentVariables();
+        environmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");
+
+        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables);
+        assertTrue(bufferedLogger.getOutputString(LogLevel.DEBUG).contains("Skipping phone home"));
+
+        environmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "false");
+
+        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables);
+        assertTrue(bufferedLogger.getOutputString(LogLevel.DEBUG).contains("Phoning home to "));
     }
 
     @Test
@@ -230,7 +268,7 @@ public class PhoneHomeClientUnitTest {
     public void validateBadPhoneHomeBackend() throws Exception {
         final PhoneHomeClient phClient = new PhoneHomeClient(null, null, 0, null, false);
         try {
-            phClient.postPhoneHomeRequest(null);
+            phClient.postPhoneHomeRequest(null, new CIEnvironmentVariables());
             fail("Phone home exception not thrown");
         } catch (final PhoneHomeException e) {
             // Do nothing

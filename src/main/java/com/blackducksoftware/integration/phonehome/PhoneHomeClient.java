@@ -37,8 +37,10 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
+import com.blackducksoftware.integration.util.CIEnvironmentVariables;
 
 public class PhoneHomeClient {
+    public static final String SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
     public static final String PHONE_HOME_BACKEND = "https://collect.blackducksoftware.com";
     private final IntLogger logger;
     private URL phoneHomeBackendUrl;
@@ -66,7 +68,14 @@ public class PhoneHomeClient {
         this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
-    public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody) throws PhoneHomeException {
+    public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
+        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
+            final Boolean skipPhoneHome = Boolean.valueOf(environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE));
+            if (skipPhoneHome) {
+                logger.debug("Skipping phone home");
+                return;
+            }
+        }
         if (phoneHomeBackendUrl == null) {
             throw new PhoneHomeException("No phone home server found.");
         }
