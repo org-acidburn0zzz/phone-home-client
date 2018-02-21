@@ -69,15 +69,15 @@ public class PhoneHomeClient {
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
-        if (phoneHomeBackendUrl == null) {
-            throw new PhoneHomeException("No phone home server found.");
-        }
         if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
             final Boolean skipPhoneHome = Boolean.valueOf(environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE));
             if (skipPhoneHome) {
                 logger.debug("Skipping phone home");
                 return;
             }
+        }
+        if (phoneHomeBackendUrl == null) {
+            throw new PhoneHomeException("No phone home server found.");
         }
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
 
