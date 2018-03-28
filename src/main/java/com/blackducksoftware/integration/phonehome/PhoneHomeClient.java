@@ -26,6 +26,10 @@ package com.blackducksoftware.integration.phonehome;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.http.entity.ContentType;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
@@ -97,6 +101,38 @@ public class PhoneHomeClient {
         } catch (final IntegrationException e) {
             throw new PhoneHomeException(e.getMessage(), e);
         }
+    }
+
+    public Request createGoogleAnalyticsRequest(final String trackingId, final String registrationId, final String hostName, final String blackDuckName, final String blackDuckVersion, final String thirdPartyName,
+            final String thirdPartyVersion, final String pluginVersion, final String source) {
+        final Map<String, String> payloadData = new HashMap<>();
+        payloadData.put("v", "1");
+        payloadData.put("t", "event");
+        // Tracking ID
+        payloadData.put("tid", trackingId);
+        // User ID
+        payloadData.put("uid", registrationId);
+        // Document Referrer
+        payloadData.put("dr", hostName);
+        // App Name
+        payloadData.put("an", blackDuckName);
+        // App Version
+        payloadData.put("av", blackDuckVersion);
+        // App Installer ID
+        payloadData.put("aiid", thirdPartyName);
+        // App ID
+        payloadData.put("aid", thirdPartyVersion);
+        // TODO pluginVersion, source
+
+        final BodyContent body = new BodyContent(payloadData);
+
+        // TODO
+        return new Request.Builder("https://www.google-analytics.com/debug/collect")
+                .mimeType(ContentType.TEXT_PLAIN.getMimeType())
+                .addAdditionalHeader("User-Agent", "Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14") // TODO
+                .method(HttpMethod.POST)
+                .bodyContent(body)
+                .build();
     }
 
 }
