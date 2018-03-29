@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.http.entity.ContentType;
 
@@ -112,6 +113,8 @@ public class PhoneHomeClient {
         payloadData.put("t", "event");
         // Document Path
         payloadData.put("dp", "INTEGRATIONS");
+        // Client ID
+        payloadData.put("cid", UUID.randomUUID().toString());
         // Tracking ID
         payloadData.put("tid", trackingId);
         // User ID
@@ -137,9 +140,8 @@ public class PhoneHomeClient {
         // TODO
 
         final BodyContent body = new BodyContent(payloadData);
-        return new Request.Builder("https://www.google-analytics.com/analytics.js/collect")
+        return new Request.Builder("https://www.google-analytics.com/collect")
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
-                // .addAdditionalHeader("User-Agent", "Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14") // TODO
                 .method(HttpMethod.POST)
                 .bodyContent(body)
                 .build();
