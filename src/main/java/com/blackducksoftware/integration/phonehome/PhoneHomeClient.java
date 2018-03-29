@@ -106,8 +106,12 @@ public class PhoneHomeClient {
     public Request createGoogleAnalyticsRequest(final String trackingId, final String registrationId, final String hostName, final String blackDuckName, final String blackDuckVersion, final String thirdPartyName,
             final String thirdPartyVersion, final String pluginVersion, final String source) {
         final Map<String, String> payloadData = new HashMap<>();
+        // Api Version
         payloadData.put("v", "1");
+        // Hit Type
         payloadData.put("t", "event");
+        // Document Path
+        payloadData.put("dp", "INTEGRATIONS");
         // Tracking ID
         payloadData.put("tid", trackingId);
         // User ID
@@ -124,12 +128,18 @@ public class PhoneHomeClient {
         payloadData.put("aid", thirdPartyVersion);
         // TODO pluginVersion, source
 
-        final BodyContent body = new BodyContent(payloadData);
+        // return new Request.Builder("https://www.google-analytics.com/collect")
+        // .mimeType(ContentType.TEXT_PLAIN.getMimeType())
+        // .method(HttpMethod.GET)
+        // .queryParameters(payloadData)
+        // .build();
 
         // TODO
-        return new Request.Builder("https://www.google-analytics.com/debug/collect")
+
+        final BodyContent body = new BodyContent(payloadData);
+        return new Request.Builder("https://www.google-analytics.com/analytics.js/collect")
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
-                .addAdditionalHeader("User-Agent", "Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14") // TODO
+                // .addAdditionalHeader("User-Agent", "Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14") // TODO
                 .method(HttpMethod.POST)
                 .bodyContent(body)
                 .build();

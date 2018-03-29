@@ -33,13 +33,15 @@ public class PhoneHomeClientTest {
         final IntLogger intLogger = new PrintStreamIntLogger(System.out, LogLevel.DEBUG);
         final ProxyInfo proxyInfo = new ProxyInfo("", 0, null, "", null, null);
         final PhoneHomeClient phClient = new PhoneHomeClient(intLogger, 120, proxyInfo, true);
-        final Request request = phClient.createGoogleAnalyticsRequest("UA-116285836-2", "example_reg_key", "exampleHostName", "Hub", "4.5.0", "SonarQube", "6.7.1", "example_plugin_version", "example_source");
-        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL("https://google.com/collect"), 120, proxyInfo);
+        final Request request = phClient.createGoogleAnalyticsRequest("UA-116285836-2", "example_reg_key", "exampleHostName", "Hub", "4_5_0", "SonarQube", "6_7_1", "example_plugin_version", "example_source");
+        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL("https://www.google-analytics.com/collect"), 120, proxyInfo);
 
         for (int i = 0; i < 10; i++) {
+            request.getBodyContent().getBodyContentMap().put("uid", "example_reg_key_" + i);
             @SuppressWarnings("resource")
             final Response response = restConnection.executeRequest(request);
             intLogger.info("Response Code: " + response.getStatusCode());
+            intLogger.info("Response String: " + response.getContentString());
             response.close();
         }
     }
