@@ -13,6 +13,7 @@ package com.blackducksoftware.integration.phonehome;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -33,17 +34,15 @@ public class PhoneHomeClientTest {
         final IntLogger intLogger = new PrintStreamIntLogger(System.out, LogLevel.DEBUG);
         final ProxyInfo proxyInfo = new ProxyInfo("", 0, null, "", null, null);
         final PhoneHomeClient phClient = new PhoneHomeClient(intLogger, 120, proxyInfo, true);
-        final Request request = phClient.createGoogleAnalyticsRequest("UA-116285836-2", "example_reg_key", "exampleHostName", "Hub", "4_5_0", "SonarQube", "6_7_1", "example_plugin_version", "example_source");
         final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL("https://www.google-analytics.com/collect"), 120, proxyInfo);
 
-        for (int i = 0; i < 10; i++) {
-            request.getBodyContent().getBodyContentMap().put("uid", "example_reg_key_" + i);
-            @SuppressWarnings("resource")
-            final Response response = restConnection.executeRequest(request);
-            intLogger.info("Response Code: " + response.getStatusCode());
-            intLogger.info("Response String: " + response.getContentString());
-            response.close();
-        }
+        final Request request = phClient.createGoogleAnalyticsRequest("UA-116285836-2", "int_hub_xx", "external_host", "Hub", "4.5.0", "Bamboo", "6.0.1", "3.2.0", "INTEGRATIONS");
+        request.getBodyContent().getBodyContentMap().put("cid", UUID.randomUUID().toString());
+        @SuppressWarnings("resource")
+        final Response response = restConnection.executeRequest(request);
+        intLogger.info("Response Code: " + response.getStatusCode());
+        intLogger.info("Response String: " + response.getContentString());
+        response.close();
     }
 
 }

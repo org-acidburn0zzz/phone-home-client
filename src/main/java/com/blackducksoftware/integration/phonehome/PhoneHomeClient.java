@@ -110,37 +110,28 @@ public class PhoneHomeClient {
         // Api Version
         payloadData.put("v", "1");
         // Hit Type
-        payloadData.put("t", "event");
-        // Document Path
-        payloadData.put("dp", "INTEGRATIONS");
+        payloadData.put("t", "pageview");
         // Client ID
+        // TODO same UUID for same host
         payloadData.put("cid", UUID.randomUUID().toString());
+        // User ID
+        payloadData.put("uid", UUID.randomUUID().toString());
         // Tracking ID
         payloadData.put("tid", trackingId);
-        // User ID
-        payloadData.put("uid", registrationId);
-        // Document Referrer
-        payloadData.put("dr", hostName);
-        // App Name
-        payloadData.put("an", blackDuckName);
-        // App Version
-        payloadData.put("av", blackDuckVersion);
-        // App Installer ID
-        payloadData.put("aiid", thirdPartyName);
-        // App ID
-        payloadData.put("aid", thirdPartyVersion);
-        // TODO pluginVersion, source
+        // Document Path
+        payloadData.put("dp", "/");
 
-        // return new Request.Builder("https://www.google-analytics.com/collect")
-        // .mimeType(ContentType.TEXT_PLAIN.getMimeType())
-        // .method(HttpMethod.GET)
-        // .queryParameters(payloadData)
-        // .build();
-
-        // TODO
+        payloadData.put("cd1", registrationId);
+        payloadData.put("cd2", hostName);
+        payloadData.put("cd3", blackDuckName);
+        payloadData.put("cd4", blackDuckVersion);
+        payloadData.put("cd5", thirdPartyName);
+        payloadData.put("cd6", thirdPartyVersion);
+        payloadData.put("cd7", pluginVersion);
+        payloadData.put("cd8", source);
 
         final BodyContent body = new BodyContent(payloadData);
-        return new Request.Builder("https://www.google-analytics.com/collect")
+        return new Request.Builder("https://www.google-analytics.com/debug/collect")
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
                 .method(HttpMethod.POST)
                 .bodyContent(body)
