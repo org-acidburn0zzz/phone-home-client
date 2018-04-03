@@ -26,22 +26,17 @@ package com.blackducksoftware.integration.phonehome;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.http.entity.ContentType;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
 import com.blackducksoftware.integration.hub.request.Response;
-import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
 
 public class PhoneHomeClient {
@@ -56,7 +51,7 @@ public class PhoneHomeClient {
     public PhoneHomeClient(final IntLogger logger, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
         try {
-            this.phoneHomeBackendUrl = new URL(PHONE_HOME_BACKEND);
+            this.phoneHomeBackendUrl = new URL(GoogleAnalyticsConstants.BASE_URL);
         } catch (final MalformedURLException e) {
             phoneHomeBackendUrl = null;
         }
@@ -74,6 +69,10 @@ public class PhoneHomeClient {
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
+        postPhoneHomeRequest(phoneHomeRequestBody, environmentVariables, GoogleAnalyticsConstants.PRODUCTION_INTEGRATIONS_TRACKING_ID);
+    }
+
+    public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables, final String googleAnalyticsTrackingId) throws PhoneHomeException {
         if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
             final Boolean skipPhoneHome = Boolean.valueOf(environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE));
             if (skipPhoneHome) {
@@ -83,6 +82,8 @@ public class PhoneHomeClient {
         }
         if (phoneHomeBackendUrl == null) {
             throw new PhoneHomeException("No phone home server found.");
+        } else if (!phoneHomeBackendUrl.toString().contains(GoogleAnalyticsConstants.BASE_URL)) {
+            throw new PhoneHomeException("The following endpoint is not supported: " + phoneHomeBackendUrl.toString());
         }
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
 
@@ -93,49 +94,16 @@ public class PhoneHomeClient {
         builder.applyProxyInfo(proxyInfo);
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
-        try {
-            final Request request = new Request.Builder(phoneHomeBackendUrl.toString()).method(HttpMethod.POST).bodyContent(new BodyContent(phoneHomeRequestBody)).build();
-            try (Response response = restConnection.executeRequest(request)) {
-            } catch (final IOException io) {
-                throw new PhoneHomeException(io.getMessage(), io);
-            }
+
+        final GoogleAnalyticsRequestHelper requestBuilder = new GoogleAnalyticsRequestHelper(googleAnalyticsTrackingId, phoneHomeRequestBody);
+
+        final Request request = requestBuilder.createRequest();
+        try (Response response = restConnection.executeRequest(request)) {
+        } catch (final IOException io) {
+            throw new PhoneHomeException(io.getMessage(), io);
         } catch (final IntegrationException e) {
             throw new PhoneHomeException(e.getMessage(), e);
         }
-    }
-
-    public Request createGoogleAnalyticsRequest(final String trackingId, final String registrationId, final String hostName, final String blackDuckName, final String blackDuckVersion, final String thirdPartyName,
-            final String thirdPartyVersion, final String pluginVersion, final String source) {
-        final Map<String, String> payloadData = new HashMap<>();
-        // Api Version
-        payloadData.put("v", "1");
-        // Hit Type
-        payloadData.put("t", "pageview");
-        // Client ID
-        // TODO same UUID for same host
-        payloadData.put("cid", UUID.randomUUID().toString());
-        // User ID
-        payloadData.put("uid", UUID.randomUUID().toString());
-        // Tracking ID
-        payloadData.put("tid", trackingId);
-        // Document Path
-        payloadData.put("dp", "/");
-
-        payloadData.put("cd1", registrationId);
-        payloadData.put("cd2", hostName);
-        payloadData.put("cd3", blackDuckName);
-        payloadData.put("cd4", blackDuckVersion);
-        payloadData.put("cd5", thirdPartyName);
-        payloadData.put("cd6", thirdPartyVersion);
-        payloadData.put("cd7", pluginVersion);
-        payloadData.put("cd8", source);
-
-        final BodyContent body = new BodyContent(payloadData);
-        return new Request.Builder("https://www.google-analytics.com/debug/collect")
-                .mimeType(ContentType.TEXT_PLAIN.getMimeType())
-                .method(HttpMethod.POST)
-                .bodyContent(body)
-                .build();
     }
 
 }

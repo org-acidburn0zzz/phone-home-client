@@ -13,7 +13,6 @@ package com.blackducksoftware.integration.phonehome;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.UUID;
 
 import org.junit.Test;
 
@@ -26,18 +25,25 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
+import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
+import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
+import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 
-public class PhoneHomeClientTest {
+public class GoogleAnalyticsRequestHelperTest {
+    private static final String TEST_TRACKING_ID = "UA-116285836-2";
 
     @Test
-    public void test() throws IOException, IntegrationException {
+    public void basicRequestTest() throws IOException, IntegrationException {
         final IntLogger intLogger = new PrintStreamIntLogger(System.out, LogLevel.DEBUG);
         final ProxyInfo proxyInfo = new ProxyInfo("", 0, null, "", null, null);
-        final PhoneHomeClient phClient = new PhoneHomeClient(intLogger, 120, proxyInfo, true);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL("https://www.google-analytics.com/collect"), 120, proxyInfo);
+        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL(GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT), 120, proxyInfo);
 
-        final Request request = phClient.createGoogleAnalyticsRequest("UA-116285836-2", "int_hub_xx", "external_host", "Hub", "4.5.0", "Bamboo", "6.0.1", "3.2.0", "INTEGRATIONS");
-        request.getBodyContent().getBodyContentMap().put("cid", UUID.randomUUID().toString());
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(TEST_TRACKING_ID, "ph_client_test_reg_id", "ph_client_test_host_name", PhoneHomeSource.INTEGRATIONS, BlackDuckName.HUB,
+                "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
+
+        final Request request = helper.createRequest();
         @SuppressWarnings("resource")
         final Response response = restConnection.executeRequest(request);
         intLogger.info("Response Code: " + response.getStatusCode());
