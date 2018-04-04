@@ -12,7 +12,7 @@ version = '0.9.0-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
-    compile 'com.blackducksoftware.integration:hub-common-rest:8.1.0'
+    compile 'com.blackducksoftware.integration:hub-common-rest:8.2.1'
     compile 'com.blackducksoftware.integration:phone-home-api:7.0.0'
 
     testCompile 'org.mock-server:mockserver-netty:3.10.4'
