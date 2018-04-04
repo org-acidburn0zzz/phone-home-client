@@ -13,7 +13,7 @@ apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
     compile 'com.blackducksoftware.integration:hub-common-rest:8.1.0'
-    compile 'com.blackducksoftware.integration:phone-home-api:6.0.0'
+    compile 'com.blackducksoftware.integration:phone-home-api:7.0.0'
 
     testCompile 'org.mock-server:mockserver-netty:3.10.4'
 }

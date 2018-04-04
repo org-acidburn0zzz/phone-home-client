@@ -26,6 +26,7 @@ package com.blackducksoftware.integration.phonehome.google.analytics;
 public class GoogleAnalyticsConstants {
     // Google Tracking ID
     public static final String PRODUCTION_INTEGRATIONS_TRACKING_ID = "UA-116682967-1";
+    public static final String TEST_INTEGRATIONS_TRACKING_ID = "UA-116682967-2";
 
     // Api Path(s)
     public static final String BASE_URL = "https://www.google-analytics.com";

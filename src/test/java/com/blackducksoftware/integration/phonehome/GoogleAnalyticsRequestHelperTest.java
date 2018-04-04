@@ -11,6 +11,8 @@
  */
 package com.blackducksoftware.integration.phonehome;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -32,23 +34,28 @@ import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyt
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 
 public class GoogleAnalyticsRequestHelperTest {
-    private static final String TEST_TRACKING_ID = "UA-116285836-2";
 
     @Test
     public void basicRequestTest() throws IOException, IntegrationException {
         final IntLogger intLogger = new PrintStreamIntLogger(System.out, LogLevel.DEBUG);
         final ProxyInfo proxyInfo = new ProxyInfo("", 0, null, "", null, null);
-        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL(GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT), 120, proxyInfo);
+        final RestConnection restConnection = new UnauthenticatedRestConnection(intLogger, new URL(GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT), 120, proxyInfo);
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(TEST_TRACKING_ID, "ph_client_test_reg_id", "ph_client_test_host_name", PhoneHomeSource.INTEGRATIONS, BlackDuckName.HUB,
-                "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
+        final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, "ph_client_test_reg_id", "ph_client_test_host_name", PhoneHomeSource.INTEGRATIONS,
+                BlackDuckName.HUB, "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
 
         final Request request = helper.createRequest();
         @SuppressWarnings("resource")
         final Response response = restConnection.executeRequest(request);
-        intLogger.info("Response Code: " + response.getStatusCode());
-        intLogger.info("Response String: " + response.getContentString());
+        final int responseCode = response.getStatusCode();
+        final String responseContent = response.getContentString();
         response.close();
+
+        intLogger.info("Response Code: " + responseCode);
+        intLogger.info("Response String:\n" + responseContent);
+
+        assertEquals(200, responseCode);
     }
 
 }

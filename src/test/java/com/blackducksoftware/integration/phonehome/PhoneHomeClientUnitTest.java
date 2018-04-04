@@ -30,16 +30,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockserver.client.server.MockServerClient;
-import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.Header;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
 
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
@@ -50,35 +43,19 @@ import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEn
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
 import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
 
 public class PhoneHomeClientUnitTest {
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    @Rule
-    public final MockServerRule msRule = new MockServerRule(this);
-
-    public static final String LOCALHOST = "127.0.0.1";
     public static final int TIMEOUT = 5;
 
-    private final MockServerClient msClient = new MockServerClient(LOCALHOST, msRule.getPort());
-    private final int port = msRule.getPort();
-
-    @Before
-    public void startProxy() {
-        msClient.when(new HttpRequest().withPath("/test")).respond(new HttpResponse().withHeader(new Header("Content-Type", "json")));
-    }
-
-    @After
-    public void stopProxy() {
-        // Intentionally left blank
-    }
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void callHomeInvalidUrl() throws Exception {
         exception.expect(PhoneHomeException.class);
-        final String targetUrl = "http://example.com:" + this.port + "/test";
+        final String targetUrl = "http://example.com:1010/test";
         final URL url = new URL(targetUrl);
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(new IntBufferedLogger());
@@ -88,16 +65,17 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
         final String regId = "regId";
+        final String hostName = "hostName";
         final PhoneHomeSource source = PhoneHomeSource.INTEGRATIONS;
         final Map<String, String> infoMap = new HashMap<>();
-        final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, source.getName(), infoMap);
+        final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, hostName, source.getName(), infoMap);
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
     }
 
     @Test
     public void callHomeValidUrl() throws Exception {
-        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
         final URL url = new URL(targetUrl);
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(new IntBufferedLogger());
@@ -105,17 +83,19 @@ public class PhoneHomeClientUnitTest {
         builder.setTimeout(TIMEOUT);
         final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), url, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
+
         final String regId = "regId";
+        final String hostName = "hostName";
         final PhoneHomeSource source = PhoneHomeSource.INTEGRATIONS;
         final Map<String, String> infoMap = new HashMap<>();
-        final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, source.getName(), infoMap);
+        final PhoneHomeRequestBody phoneHomeRequest = new PhoneHomeRequestBody(regId, hostName, source.getName(), infoMap);
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
     }
 
     @Test
     public void callHomeIntegrationsTest() throws Exception {
-        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
         final URL url = new URL(targetUrl);
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(new IntBufferedLogger());
@@ -126,7 +106,7 @@ public class PhoneHomeClientUnitTest {
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
         phoneHomeRequestBuilder.setRegistrationId("regKey");
-        phoneHomeRequestBuilder.setHostName(null);
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
         phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
         phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
@@ -135,12 +115,12 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
     }
 
     @Test
     public void callHomeIntegrationsTestWithHostName() throws Exception {
-        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
         final URL url = new URL(targetUrl);
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(new IntBufferedLogger());
@@ -160,12 +140,12 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
+        phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
     }
 
     @Test
     public void callHomeSkip() throws Exception {
-        final String targetUrl = "http://" + LOCALHOST + ":" + this.port + "/test";
+        final String targetUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
         final URL url = new URL(targetUrl);
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
 
@@ -190,12 +170,12 @@ public class PhoneHomeClientUnitTest {
         final CIEnvironmentVariables environmentVariables = new CIEnvironmentVariables();
         environmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
         assertTrue(bufferedLogger.getOutputString(LogLevel.DEBUG).contains("Skipping phone home"));
 
         environmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "false");
 
-        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables);
+        phClient.postPhoneHomeRequest(phoneHomeRequest, environmentVariables, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
         assertTrue(bufferedLogger.getOutputString(LogLevel.DEBUG).contains("Phoning home to "));
     }
 
@@ -237,7 +217,7 @@ public class PhoneHomeClientUnitTest {
     public void validatePhoneHomeRequestBuilding() throws Exception {
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
         phoneHomeRequestBuilder.setRegistrationId("regKey");
-        phoneHomeRequestBuilder.setHostName(null);
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
         phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
         phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
@@ -259,7 +239,6 @@ public class PhoneHomeClientUnitTest {
         assertTrue(builderInfoMap.equals((phoneHomeRequest.getInfoMap())));
 
         phoneHomeRequestBuilder.setRegistrationId(null);
-        phoneHomeRequestBuilder.setHostName(LOCALHOST);
         final PhoneHomeRequestBody phoneHomeRequestWithHost = phoneHomeRequestBuilder.build();
         assertTrue(phoneHomeRequestBuilder.md5Hash(phoneHomeRequestBuilder.getHostName()).equals(phoneHomeRequestWithHost.getRegId()));
     }
@@ -268,7 +247,7 @@ public class PhoneHomeClientUnitTest {
     public void validateBadPhoneHomeBackend() throws Exception {
         final PhoneHomeClient phClient = new PhoneHomeClient(null, null, 0, null, false);
         try {
-            phClient.postPhoneHomeRequest(null, new CIEnvironmentVariables());
+            phClient.postPhoneHomeRequest(null, new CIEnvironmentVariables(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
             fail("Phone home exception not thrown");
         } catch (final PhoneHomeException e) {
             // Do nothing
@@ -277,7 +256,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void constructPhoneHomeClientWithoutUrl() throws Exception {
-        final String targetUrl = "http://example.com:" + this.port + "/test";
+        final String targetUrl = "http://example.com:1010/test";
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(new IntBufferedLogger());
         builder.setBaseUrl(targetUrl);

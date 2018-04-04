@@ -58,6 +58,12 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator {
         }
     }
 
+    public void validateHostName(final ValidationResults result) {
+        if (StringUtils.isBlank(hostName)) {
+            result.addResult(PhoneHomeRequestFieldEnum.HOSTNAME, new ValidationResult(ValidationResultEnum.ERROR, "No host name was found."));
+        }
+    }
+
     public void validateBlackDuckProductInfo(final ValidationResults result) {
         if (blackDuckName == null || StringUtils.isBlank(blackDuckName)) {
             result.addResult(PhoneHomeRequestFieldEnum.BLACKDUCKNAME, new ValidationResult(ValidationResultEnum.ERROR, "No Black Duck product name was found."));

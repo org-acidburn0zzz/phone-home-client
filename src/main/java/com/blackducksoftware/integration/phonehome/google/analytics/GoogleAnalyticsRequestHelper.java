@@ -38,7 +38,8 @@ import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEn
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
 import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
-public class GoogleAnalyticsRequestHelper { 
+public class GoogleAnalyticsRequestHelper {
+    private final String collectUrl;
     private final String trackingId;
 
     private final String regId;
@@ -51,10 +52,12 @@ public class GoogleAnalyticsRequestHelper {
     private final String thirdPartyVersion;
     private final String pluginVersion;
 
-    public GoogleAnalyticsRequestHelper(final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+    public GoogleAnalyticsRequestHelper(final String collectUrl, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+        this.collectUrl = collectUrl;
         this.trackingId = trackingId;
 
         this.regId = phoneHomeRequestBody.getRegId();
+        this.hostName = phoneHomeRequestBody.getHostName();
         this.source = phoneHomeRequestBody.getSource();
 
         final Map<String, String> infoMap = phoneHomeRequestBody.getInfoMap();
@@ -63,13 +66,11 @@ public class GoogleAnalyticsRequestHelper {
         this.thirdPartyName = infoMap.get(PhoneHomeRequestFieldEnum.THIRDPARTYNAME.getKey());
         this.thirdPartyVersion = infoMap.get(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION.getKey());
         this.pluginVersion = infoMap.get(PhoneHomeRequestFieldEnum.PLUGINVERSION.getKey());
-
-        this.hostName = getHostNameFromMetadata(infoMap);
     }
 
-    public GoogleAnalyticsRequestHelper(final String trackingId, final String regId, final String hostName, final PhoneHomeSource source, final BlackDuckName blackDuckName, final String blackDuckVersion, final ThirdPartyName thirdPartyName,
-            final String thirdPartyVersion,
-            final String pluginVersion) {
+    public GoogleAnalyticsRequestHelper(final String collectUrl, final String trackingId, final String regId, final String hostName, final PhoneHomeSource source, final BlackDuckName blackDuckName, final String blackDuckVersion,
+            final ThirdPartyName thirdPartyName, final String thirdPartyVersion, final String pluginVersion) {
+        this.collectUrl = collectUrl;
         this.trackingId = trackingId;
 
         this.regId = regId;
@@ -85,7 +86,7 @@ public class GoogleAnalyticsRequestHelper {
 
     public Request createRequest() {
         final BodyContent body = new BodyContent(getPayloadDataMap());
-        return new Request.Builder(GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT)
+        return new Request.Builder(collectUrl)
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
                 .method(HttpMethod.POST)
                 .bodyContent(body)
@@ -96,8 +97,7 @@ public class GoogleAnalyticsRequestHelper {
         final Map<String, String> payloadData = new HashMap<>();
         payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
         payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-        // TODO use host name once it is required
-        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, UUID.nameUUIDFromBytes(regId.getBytes()).toString());
+        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, UUID.nameUUIDFromBytes(hostName.getBytes()).toString());
         payloadData.put(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
         payloadData.put(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
 
@@ -112,12 +112,6 @@ public class GoogleAnalyticsRequestHelper {
         payloadData.put(GoogleAnalyticsConstants.SOURCE_KEY, source);
 
         return payloadData;
-    }
-
-    private String getHostNameFromMetadata(final Map<String, String> infoMap) {
-        final String metaHostNameKey = "hostName";
-        final String alternateHostNameKey = "hub.host.name";
-        return infoMap.containsKey(metaHostNameKey) ? infoMap.get(metaHostNameKey) : infoMap.containsKey(alternateHostNameKey) ? infoMap.get(alternateHostNameKey) : "<NOT_PROVIDED>";
     }
 
 }
