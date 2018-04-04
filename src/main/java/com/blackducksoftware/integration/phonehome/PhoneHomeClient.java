@@ -24,48 +24,36 @@
 package com.blackducksoftware.integration.phonehome;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
 import com.blackducksoftware.integration.hub.request.Response;
-import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
+import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
 
 public class PhoneHomeClient {
     public static final String SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
-    public static final String PHONE_HOME_BACKEND = "https://collect.blackducksoftware.com";
     private final IntLogger logger;
-    private URL phoneHomeBackendUrl;
+    private final String googleAnalyticsTrackingId;
+    private final String phoneHomeBackendUrl;
     private final int timeout;
     private final ProxyInfo proxyInfo;
     private final boolean alwaysTrustServerCertificate;
 
-    public PhoneHomeClient(final IntLogger logger, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
+    public PhoneHomeClient(final IntLogger logger, final String googleAnalyticsTrackingId, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
-        try {
-            this.phoneHomeBackendUrl = new URL(PHONE_HOME_BACKEND);
-        } catch (final MalformedURLException e) {
-            phoneHomeBackendUrl = null;
-        }
+        this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
+        this.phoneHomeBackendUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
         this.timeout = timeout;
         this.proxyInfo = proxyInfo;
         this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
-    }
 
-    public PhoneHomeClient(final IntLogger logger, final URL phoneHomeBackendUrl, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
-        this.logger = logger;
-        this.phoneHomeBackendUrl = phoneHomeBackendUrl;
-        this.timeout = timeout;
-        this.proxyInfo = proxyInfo;
-        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
@@ -76,26 +64,28 @@ public class PhoneHomeClient {
                 return;
             }
         }
-        if (phoneHomeBackendUrl == null) {
-            throw new PhoneHomeException("No phone home server found.");
+        if (phoneHomeRequestBody == null) {
+            throw new PhoneHomeException("The request body must not be null.");
         }
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
 
         final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
         builder.setLogger(logger);
-        builder.setBaseUrl(phoneHomeBackendUrl.toString());
+        builder.setBaseUrl(phoneHomeBackendUrl);
         builder.setTimeout(timeout);
         builder.applyProxyInfo(proxyInfo);
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
-        try {
-            final Request request = new Request.Builder(phoneHomeBackendUrl.toString()).method(HttpMethod.POST).bodyContent(new BodyContent(phoneHomeRequestBody)).build();
-            try (Response response = restConnection.executeRequest(request)) {
-            } catch (final IOException io) {
-                throw new PhoneHomeException(io.getMessage(), io);
-            }
-        } catch (final IntegrationException e) {
-            throw new PhoneHomeException(e.getMessage(), e);
+
+        final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(phoneHomeBackendUrl, googleAnalyticsTrackingId, phoneHomeRequestBody);
+        final Request request = requestHelper.createRequest();
+
+        try (Response response = restConnection.executeRequest(request)) {
+            logger.trace("Google Analytics Response Code: " + response.getStatusCode());
+        } catch (final IOException ioEx) {
+            throw new PhoneHomeException(ioEx.getMessage(), ioEx);
+        } catch (final IntegrationException intEx) {
+            throw new PhoneHomeException(intEx.getMessage(), intEx);
         }
     }
 

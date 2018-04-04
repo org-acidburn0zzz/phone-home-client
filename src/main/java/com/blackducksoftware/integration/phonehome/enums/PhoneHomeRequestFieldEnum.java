@@ -28,6 +28,7 @@ import com.blackducksoftware.integration.validator.FieldEnum;
 public enum PhoneHomeRequestFieldEnum implements FieldEnum {
     BLACKDUCKNAME("blackDuckName"),
     BLACKDUCKVERSION("blackDuckVersion"),
+    HOSTNAME("hostName"),
     PLUGINVERSION("pluginVersion"),
     REGID("regId"),
     THIRDPARTYNAME("thirdPartyName"),

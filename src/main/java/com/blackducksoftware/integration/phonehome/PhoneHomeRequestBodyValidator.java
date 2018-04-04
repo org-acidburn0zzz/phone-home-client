@@ -45,6 +45,7 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator {
     public ValidationResults assertValid() {
         final ValidationResults result = new ValidationResults();
         validateHubServerIdentifier(result);
+        validateHostName(result);
         validateBlackDuckProductInfo(result);
         validateThirdPartyProductInfo(result);
         validateIntegrationInfo(result);
@@ -55,6 +56,12 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator {
     public void validateHubServerIdentifier(final ValidationResults result) {
         if (StringUtils.isBlank(registrationId) && StringUtils.isBlank(hostName)) {
             result.addResult(PhoneHomeRequestFieldEnum.REGID, new ValidationResult(ValidationResultEnum.ERROR, "No Hub server identifier was found."));
+        }
+    }
+
+    public void validateHostName(final ValidationResults result) {
+        if (StringUtils.isBlank(hostName)) {
+            result.addResult(PhoneHomeRequestFieldEnum.HOSTNAME, new ValidationResult(ValidationResultEnum.ERROR, "No host name was found."));
         }
     }
 

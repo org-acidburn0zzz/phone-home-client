@@ -63,7 +63,7 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
         infoMap.put(PhoneHomeRequestFieldEnum.THIRDPARTYNAME.getKey(), thirdPartyName);
         infoMap.put(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION.getKey(), thirdPartyVersion);
         infoMap.put(PhoneHomeRequestFieldEnum.PLUGINVERSION.getKey(), pluginVersion);
-        final PhoneHomeRequestBody info = new PhoneHomeRequestBody(hubIdentifier, source, infoMap);
+        final PhoneHomeRequestBody info = new PhoneHomeRequestBody(hubIdentifier, hostName, source, infoMap);
         return info;
     }
 
