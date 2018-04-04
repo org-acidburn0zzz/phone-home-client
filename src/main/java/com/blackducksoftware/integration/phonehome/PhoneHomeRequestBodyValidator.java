@@ -45,6 +45,7 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator {
     public ValidationResults assertValid() {
         final ValidationResults result = new ValidationResults();
         validateHubServerIdentifier(result);
+        validateHostName(result);
         validateBlackDuckProductInfo(result);
         validateThirdPartyProductInfo(result);
         validateIntegrationInfo(result);
