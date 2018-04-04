@@ -46,15 +46,16 @@ public class GoogleAnalyticsRequestHelperTest {
                 BlackDuckName.HUB, "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
 
         final Request request = helper.createRequest();
-        @SuppressWarnings("resource")
-        final Response response = restConnection.executeRequest(request);
-        final int responseCode = response.getStatusCode();
-        final String responseContent = response.getContentString();
-        response.close();
+
+        int responseCode = -1;
+        String responseContent = "null";
+        try (final Response response = restConnection.executeRequest(request)) {
+            responseCode = response.getStatusCode();
+            responseContent = response.getContentString();
+        }
 
         intLogger.info("Response Code: " + responseCode);
         intLogger.info("Response String:\n" + responseContent);
-
         assertEquals(200, responseCode);
     }
 
