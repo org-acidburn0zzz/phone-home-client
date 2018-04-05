@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.phonehome;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
@@ -32,6 +33,7 @@ import com.blackducksoftware.integration.hub.request.Response;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
@@ -77,15 +79,19 @@ public class PhoneHomeClient {
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
 
-        final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(phoneHomeBackendUrl, googleAnalyticsTrackingId, phoneHomeRequestBody);
-        final Request request = requestHelper.createRequest();
+        final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(googleAnalyticsTrackingId, phoneHomeRequestBody);
+
+        Request request;
+        try {
+            request = requestHelper.createRequest(phoneHomeBackendUrl);
+        } catch (final UnsupportedEncodingException encodingException) {
+            throw new PhoneHomeException(encodingException);
+        }
 
         try (Response response = restConnection.executeRequest(request)) {
             logger.trace("Google Analytics Response Code: " + response.getStatusCode());
-        } catch (final IOException ioEx) {
-            throw new PhoneHomeException(ioEx.getMessage(), ioEx);
-        } catch (final IntegrationException intEx) {
-            throw new PhoneHomeException(intEx.getMessage(), intEx);
+        } catch (final IntegrationException | IOException requestException) {
+            throw new PhoneHomeException(requestException.getMessage(), requestException);
         }
     }
 

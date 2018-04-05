@@ -26,9 +26,7 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionB
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
+import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBodyBuilder;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 
@@ -46,10 +44,16 @@ public class GoogleAnalyticsRequestHelperTest {
         builder.setTimeout(120);
         final RestConnection restConnection = builder.createConnection(proxyInfo);
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, "ph_client_test_reg_id", "ph_client_test_host_name", PhoneHomeSource.INTEGRATIONS,
-                BlackDuckName.HUB, "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
+        final PhoneHomeRequestBodyBuilder bodyBuilder = new PhoneHomeRequestBodyBuilder();
+        bodyBuilder.setArtifactId("fake_artifact_id");
+        bodyBuilder.setArtifactVersion("fake_artifact_version");
+        bodyBuilder.setProductId("fake_product_id");
+        bodyBuilder.setProductVersion("fake_product_version");
+        bodyBuilder.addToMetaData("exampleMetaData", "data");
 
-        final Request request = helper.createRequest();
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
+
+        final Request request = helper.createRequest(debugUrl);
 
         int responseCode = -1;
         String responseContent = "null";

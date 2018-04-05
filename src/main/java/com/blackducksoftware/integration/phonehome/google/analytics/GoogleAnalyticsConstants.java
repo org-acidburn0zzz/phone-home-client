@@ -42,13 +42,11 @@ public class GoogleAnalyticsConstants {
     public static final String DOCUMENT_PATH_KEY = "dp";
 
     // Payload Data - Custom Dimensions
-    public static final String REGISTRATION_ID_KEY = "cd1";
-    public static final String HOST_NAME_KEY = "cd2";
-    public static final String BLACK_DUCK_NAME_KEY = "cd3";
-    public static final String BLACK_DUCK_VERSION_KEY = "cd4";
-    public static final String THIRD_PARTY_NAME_KEY = "cd5";
-    public static final String THIRD_PARTY_VERSION_KEY = "cd6";
-    public static final String PLUGIN_VERSION_KEY = "cd7";
-    public static final String SOURCE_KEY = "cd8";
+    public static final String UNIQUE_ID = "cd1";
+    public static final String ARTIFACT_ID = "cd2";
+    public static final String ARTIFACT_VERSION = "cd3";
+    public static final String PRODUCT_ID = "cd4";
+    public static final String PRODUCT_VERSION = "cd5";
+    public static final String META_DATA = "cd6";
 
 }
