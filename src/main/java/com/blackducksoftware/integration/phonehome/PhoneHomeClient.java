@@ -24,7 +24,6 @@
 package com.blackducksoftware.integration.phonehome;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
@@ -59,12 +58,9 @@ public class PhoneHomeClient {
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
-        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
-            final Boolean skipPhoneHome = Boolean.valueOf(environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE));
-            if (skipPhoneHome) {
-                logger.debug("Skipping phone home");
-                return;
-            }
+        if (skipPhoneHome(environmentVariables)) {
+            logger.debug("Skipping phone home");
+            return;
         }
         if (phoneHomeRequestBody == null) {
             throw new PhoneHomeException("The request body must not be null.");
@@ -80,19 +76,21 @@ public class PhoneHomeClient {
         final RestConnection restConnection = builder.build();
 
         final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(googleAnalyticsTrackingId, phoneHomeRequestBody);
-
-        Request request;
-        try {
-            request = requestHelper.createRequest(phoneHomeBackendUrl);
-        } catch (final UnsupportedEncodingException encodingException) {
-            throw new PhoneHomeException(encodingException);
-        }
+        final Request request = requestHelper.createRequest(phoneHomeBackendUrl);
 
         try (Response response = restConnection.executeRequest(request)) {
             logger.trace("Google Analytics Response Code: " + response.getStatusCode());
         } catch (final IntegrationException | IOException requestException) {
             throw new PhoneHomeException(requestException.getMessage(), requestException);
         }
+    }
+
+    private boolean skipPhoneHome(final CIEnvironmentVariables environmentVariables) {
+        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
+            final String valueString = environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE);
+            return Boolean.valueOf(valueString).booleanValue();
+        }
+        return false;
     }
 
 }

@@ -23,9 +23,6 @@
  */
 package com.blackducksoftware.integration.phonehome.google.analytics;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +34,6 @@ import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestHelper {
-    public static final String DEFAULT_URL_ENCODING = Charset.forName("UTF-8").toString();
-
     private final String trackingId;
 
     private final String uniqueId;
@@ -59,7 +54,7 @@ public class GoogleAnalyticsRequestHelper {
         this.metaData = phoneHomeRequestBody.getMetaData();
     }
 
-    public Request createRequest(final String url) throws UnsupportedEncodingException {
+    public Request createRequest(final String url) {
         final BodyContent body = new BodyContent(getPayloadDataMap());
         return new Request.Builder(url)
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
@@ -68,7 +63,7 @@ public class GoogleAnalyticsRequestHelper {
                 .build();
     }
 
-    private Map<String, String> getPayloadDataMap() throws UnsupportedEncodingException {
+    private Map<String, String> getPayloadDataMap() {
         final Map<String, String> payloadData = new HashMap<>();
         payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
         payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
@@ -87,15 +82,22 @@ public class GoogleAnalyticsRequestHelper {
         return payloadData;
     }
 
-    private String encodeMetaData(final Map<String, String> metaData) throws UnsupportedEncodingException {
+    private String encodeMetaData(final Map<String, String> metaData) {
         final StringBuilder builder = new StringBuilder();
 
-        builder.append(URLEncoder.encode("{", DEFAULT_URL_ENCODING));
+        builder.append("{");
         for (final String key : metaData.keySet()) {
-            final String encodedPair = URLEncoder.encode("\"" + key + "\"=\"" + metaData.get(key) + "\",", DEFAULT_URL_ENCODING);
-            builder.append(encodedPair);
+            builder.append("\"");
+            builder.append(key);
+            builder.append("\":\"");
+            builder.append(metaData.get(key));
+            builder.append("\",");
         }
-        builder.append(URLEncoder.encode("}", DEFAULT_URL_ENCODING));
+        final int lastComma = builder.lastIndexOf(",");
+        if (lastComma > 0) {
+            builder.deleteCharAt(lastComma);
+        }
+        builder.append("}");
 
         return builder.toString();
     }

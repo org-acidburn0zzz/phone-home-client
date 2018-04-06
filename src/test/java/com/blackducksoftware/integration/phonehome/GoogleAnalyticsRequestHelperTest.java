@@ -49,11 +49,15 @@ public class GoogleAnalyticsRequestHelperTest {
         bodyBuilder.setArtifactVersion("fake_artifact_version");
         bodyBuilder.setProductId("fake_product_id");
         bodyBuilder.setProductVersion("fake_product_version");
-        bodyBuilder.addToMetaData("exampleMetaData", "data");
+
+        bodyBuilder.addToMetaData("exampleMetaData_1", "data");
+        bodyBuilder.addToMetaData("exampleMetaData_2", "otherData");
+        bodyBuilder.addToMetaData("exampleMetaData_3", "moreData");
 
         final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
 
         final Request request = helper.createRequest(debugUrl);
+        intLogger.info("Request Body: " + request.getBodyContent().getBodyContentMap());
 
         int responseCode = -1;
         String responseContent = "null";
