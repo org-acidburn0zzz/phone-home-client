@@ -24,27 +24,25 @@
 package com.blackducksoftware.integration.phonehome.body;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 import com.blackducksoftware.integration.builder.AbstractBuilder;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 
 public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeRequestBody> {
-    public static final String NULL_FIELD_STRING = "null";
+    public static final String EMPTY_FIELD_STRING = "null";
 
+    private String customerId;
+    private String hostName;
     private String artifactId;
     private String artifactVersion;
-    private String productId;
+    private ProductIdEnum productId;
     private String productVersion;
     private final Map<String, String> metaData = new HashMap<>();
 
@@ -56,6 +54,8 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
     @Override
     public PhoneHomeRequestBodyValidator createValidator() {
         final PhoneHomeRequestBodyValidator phoneHomeRequestValidator = new PhoneHomeRequestBodyValidator();
+        phoneHomeRequestValidator.setCustomerId(customerId);
+        phoneHomeRequestValidator.setHostName(hostName);
         phoneHomeRequestValidator.setArtifactId(artifactId);
         phoneHomeRequestValidator.setArtifactVersion(artifactVersion);
         phoneHomeRequestValidator.setProductId(productId);
@@ -63,12 +63,28 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
         return phoneHomeRequestValidator;
     }
 
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(final String customerId) {
+        this.customerId = customerId != null ? customerId : EMPTY_FIELD_STRING;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(final String hostName) {
+        this.hostName = hostName != null ? hostName : EMPTY_FIELD_STRING;
+    }
+
     public String getArtifactId() {
         return artifactId;
     }
 
     public void setArtifactId(final String artifactId) {
-        this.artifactId = artifactId != null ? artifactId : NULL_FIELD_STRING;
+        this.artifactId = artifactId != null ? artifactId : EMPTY_FIELD_STRING;
     }
 
     public String getArtifactVersion() {
@@ -76,15 +92,15 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
     }
 
     public void setArtifactVersion(final String artifactVersion) {
-        this.artifactVersion = artifactVersion != null ? artifactVersion : NULL_FIELD_STRING;
+        this.artifactVersion = artifactVersion != null ? artifactVersion : EMPTY_FIELD_STRING;
     }
 
-    public String getProductId() {
+    public ProductIdEnum getProductId() {
         return productId;
     }
 
-    public void setProductId(final String productId) {
-        this.productId = productId != null ? productId : NULL_FIELD_STRING;
+    public void setProductId(final ProductIdEnum productId) {
+        this.productId = productId;
     }
 
     public String getProductVersion() {
@@ -92,7 +108,7 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
     }
 
     public void setProductVersion(final String productVersion) {
-        this.productVersion = productVersion != null ? productVersion : NULL_FIELD_STRING;
+        this.productVersion = productVersion != null ? productVersion : EMPTY_FIELD_STRING;
     }
 
     public Map<String, String> getMetaData() {
@@ -100,29 +116,9 @@ public class PhoneHomeRequestBodyBuilder extends AbstractBuilder<PhoneHomeReques
     }
 
     public void addToMetaData(final String key, final String value) {
-        metaData.put(key, value != null ? value : NULL_FIELD_STRING);
+        metaData.put(key, value != null ? value : EMPTY_FIELD_STRING);
     }
 
-    // TODO find a way to make this per customer
-    public String generateUniqueId() {
-        byte[] macAddress;
-        try {
-            final InetAddress ip = InetAddress.getLocalHost();
-            final NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            macAddress = network.getHardwareAddress();
-        } catch (final UnknownHostException e) {
-            // TODO handle
-            throw new RuntimeException(e);
-        } catch (final SocketException e) {
-            // TODO Auto-generated catch block
-            throw new RuntimeException(e);
-        }
-
-        final UUID uniqueId = UUID.nameUUIDFromBytes(macAddress);
-        return uniqueId.toString();
-    }
-
-    // TODO is this still going to be used?
     public String md5Hash(final String string) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         final MessageDigest md = MessageDigest.getInstance(MessageDigestAlgorithms.MD5);
         final byte[] hashedBytes = md.digest(string.getBytes("UTF-8"));

@@ -26,39 +26,60 @@ package com.blackducksoftware.integration.phonehome.body;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEnum;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.validator.AbstractValidator;
 import com.blackducksoftware.integration.validator.ValidationResult;
 import com.blackducksoftware.integration.validator.ValidationResultEnum;
 import com.blackducksoftware.integration.validator.ValidationResults;
 
 public class PhoneHomeRequestBodyValidator extends AbstractValidator {
+    private String customerId;
+    private String hostName;
     private String artifactId;
     private String artifactVersion;
-    private String productId;
+    private ProductIdEnum productId;
     private String productVersion;
 
     @Override
     public ValidationResults assertValid() {
         final ValidationResults result = new ValidationResults();
+        validateCustomerInfo(result);
         validateArtifactInfo(result);
         validateProductInfo(result);
         return result;
     }
 
-    public void validateArtifactInfo(final ValidationResults result) {
-        if (StringUtils.isBlank(artifactId)) {
-            result.addResult(PhoneHomeRequestFieldEnum.ARTIFACT_ID, new ValidationResult(ValidationResultEnum.ERROR, "No artifact id was found."));
-        } else if (StringUtils.isBlank(artifactVersion)) {
-            result.addResult(PhoneHomeRequestFieldEnum.ARTIFACT_VERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", artifactId)));
+    public void validateCustomerInfo(final ValidationResults results) {
+        if (StringUtils.isBlank(hostName)) {
+            results.addResult(PhoneHomeRequestFieldEnum.HOST_NAME, new ValidationResult(ValidationResultEnum.ERROR, "No host name was found."));
+        }
+        if (StringUtils.isBlank(customerId)) {
+            results.addResult(PhoneHomeRequestFieldEnum.CUSTOMER_ID, new ValidationResult(ValidationResultEnum.ERROR, "No customer id was found."));
         }
     }
 
-    public void validateProductInfo(final ValidationResults result) {
-        if (StringUtils.isBlank(productId)) {
-            result.addResult(PhoneHomeRequestFieldEnum.PRODUCT_ID, new ValidationResult(ValidationResultEnum.ERROR, "No product id was found."));
-        } else if (StringUtils.isBlank(productVersion)) {
-            result.addResult(PhoneHomeRequestFieldEnum.PRODUCT_VERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", productId)));
+    public void validateArtifactInfo(final ValidationResults results) {
+        if (StringUtils.isBlank(artifactId)) {
+            results.addResult(PhoneHomeRequestFieldEnum.ARTIFACT_ID, new ValidationResult(ValidationResultEnum.ERROR, "No artifact id was found."));
+        } else if (StringUtils.isBlank(artifactVersion)) {
+            results.addResult(PhoneHomeRequestFieldEnum.ARTIFACT_VERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", artifactId)));
         }
+    }
+
+    public void validateProductInfo(final ValidationResults results) {
+        if (productId == null) {
+            results.addResult(PhoneHomeRequestFieldEnum.PRODUCT_ID, new ValidationResult(ValidationResultEnum.ERROR, "No product id was found."));
+        } else if (StringUtils.isBlank(productVersion)) {
+            results.addResult(PhoneHomeRequestFieldEnum.PRODUCT_VERSION, new ValidationResult(ValidationResultEnum.ERROR, String.format("No version of %s was found.", productId)));
+        }
+    }
+
+    public void setCustomerId(final String customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setHostName(final String hostName) {
+        this.hostName = hostName;
     }
 
     public void setArtifactId(final String artifactId) {
@@ -69,7 +90,7 @@ public class PhoneHomeRequestBodyValidator extends AbstractValidator {
         this.artifactVersion = artifactVersion;
     }
 
-    public void setProductId(final String productId) {
+    public void setProductId(final ProductIdEnum productId) {
         this.productId = productId;
     }
 

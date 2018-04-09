@@ -26,18 +26,22 @@ package com.blackducksoftware.integration.phonehome.body;
 import java.util.Collections;
 import java.util.Map;
 
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+
 public class PhoneHomeRequestBody {
     public static final PhoneHomeRequestBody DO_NOT_PHONE_HOME = null;
 
-    private final String uniqueId;
+    private final String customerId;
+    private final String hostName;
     private final String artifactId;
     private final String artifactVersion;
-    private final String productId;
+    private final ProductIdEnum productId;
     private final String productVersion;
     private final Map<String, String> metaData;
 
     protected PhoneHomeRequestBody(final PhoneHomeRequestBodyBuilder builder) {
-        this.uniqueId = builder.generateUniqueId();
+        this.customerId = builder.getCustomerId();
+        this.hostName = builder.getHostName();
         this.artifactId = builder.getArtifactId();
         this.artifactVersion = builder.getArtifactVersion();
         this.productId = builder.getProductId();
@@ -45,8 +49,12 @@ public class PhoneHomeRequestBody {
         this.metaData = Collections.unmodifiableMap(builder.getMetaData());
     }
 
-    public String getUniqueId() {
-        return uniqueId;
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public String getHostName() {
+        return hostName;
     }
 
     public String getArtifactId() {
@@ -57,7 +65,7 @@ public class PhoneHomeRequestBody {
         return artifactVersion;
     }
 
-    public String getProductId() {
+    public ProductIdEnum getProductId() {
         return productId;
     }
 

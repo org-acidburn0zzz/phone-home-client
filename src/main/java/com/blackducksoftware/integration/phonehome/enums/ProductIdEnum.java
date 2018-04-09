@@ -11,26 +11,19 @@
  */
 package com.blackducksoftware.integration.phonehome.enums;
 
-import com.blackducksoftware.integration.validator.FieldEnum;
+public enum ProductIdEnum {
+    CODE_CENTER("Code-Center"),
+    COVERITY("Coverity"),
+    HUB("Hub"),
+    PROTEX("Protex");
 
-public enum PhoneHomeRequestFieldEnum implements FieldEnum {
-    CUSTOMER_ID("customerId"),
-    HOST_NAME("hostName"),
-    ARTIFACT_ID("artifactId"),
-    ARTIFACT_VERSION("artifactVersion"),
-    PRODUCT_ID("productId"),
-    PRODUCT_VERSION("productVersion"),
-    META_DATA("metaData");
+    private final String key;
 
-    private String key;
-
-    private PhoneHomeRequestFieldEnum(final String key) {
+    private ProductIdEnum(final String key) {
         this.key = key;
     }
 
-    @Override
     public String getKey() {
-        return key;
+        return this.key;
     }
-
 }

@@ -9,7 +9,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Black Duck Software.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.blackducksoftware.integration.phonehome.google.analytics;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,8 +27,7 @@ import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBodyBuilder;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 
 public class GoogleAnalyticsRequestHelperTest {
 
@@ -45,9 +44,11 @@ public class GoogleAnalyticsRequestHelperTest {
         final RestConnection restConnection = builder.createConnection(proxyInfo);
 
         final PhoneHomeRequestBodyBuilder bodyBuilder = new PhoneHomeRequestBodyBuilder();
+        bodyBuilder.setCustomerId("fake_customer_id");
+        bodyBuilder.setHostName("fake_host_name");
         bodyBuilder.setArtifactId("fake_artifact_id");
         bodyBuilder.setArtifactVersion("fake_artifact_version");
-        bodyBuilder.setProductId("fake_product_id");
+        bodyBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         bodyBuilder.setProductVersion("fake_product_version");
 
         bodyBuilder.addToMetaData("exampleMetaData_1", "data");

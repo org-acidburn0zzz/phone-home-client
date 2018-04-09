@@ -39,6 +39,7 @@ import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBodyBuilder;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
@@ -61,9 +62,11 @@ public class PhoneHomeClientUnitTest {
                 restConnection.alwaysTrustServerCertificate);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
         phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-        phoneHomeRequestBuilder.setProductId("productId");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
@@ -82,9 +85,11 @@ public class PhoneHomeClientUnitTest {
                 restConnection.alwaysTrustServerCertificate);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
         phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-        phoneHomeRequestBuilder.setProductId("productId");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
@@ -104,9 +109,11 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(bufferedLogger, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
         phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-        phoneHomeRequestBuilder.setProductId("productId");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
@@ -148,7 +155,7 @@ public class PhoneHomeClientUnitTest {
         }
         try {
             phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-            phoneHomeRequestBuilder.setProductId("productId");
+            phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
         } catch (final IllegalStateException e) {
@@ -159,16 +166,18 @@ public class PhoneHomeClientUnitTest {
     @Test
     public void validatePhoneHomeRequestBuilding() throws Exception {
         final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
+        phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
         phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-        phoneHomeRequestBuilder.setProductId("productId");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final Map<String, String> builderMetaData = phoneHomeRequestBuilder.getMetaData();
         builderMetaData.put("example_meta_data", "data");
 
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        assertTrue(phoneHomeRequestBuilder.generateUniqueId().equals(phoneHomeRequest.getUniqueId()));
+        assertTrue(phoneHomeRequestBuilder.getCustomerId().equals(phoneHomeRequest.getCustomerId()));
         assertTrue(phoneHomeRequestBuilder.getArtifactId().equals(phoneHomeRequest.getArtifactId()));
         assertTrue(phoneHomeRequestBuilder.getArtifactVersion().equals(phoneHomeRequest.getArtifactVersion()));
         assertTrue(phoneHomeRequestBuilder.getProductId().equals(phoneHomeRequest.getProductId()));

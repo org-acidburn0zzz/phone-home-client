@@ -25,6 +25,7 @@ package com.blackducksoftware.integration.phonehome.google.analytics;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.http.entity.ContentType;
 
@@ -32,21 +33,24 @@ import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
 import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 
 public class GoogleAnalyticsRequestHelper {
     private final String trackingId;
 
-    private final String uniqueId;
+    private final String customerId;
+    private final String hostName;
     private final String artifactId;
     private final String artifactVersion;
-    private final String productId;
+    private final ProductIdEnum productId;
     private final String productVersion;
     private final Map<String, String> metaData;
 
     public GoogleAnalyticsRequestHelper(final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
         this.trackingId = trackingId;
 
-        this.uniqueId = phoneHomeRequestBody.getUniqueId();
+        this.customerId = phoneHomeRequestBody.getCustomerId();
+        this.hostName = phoneHomeRequestBody.getHostName();
         this.artifactId = phoneHomeRequestBody.getArtifactId();
         this.artifactVersion = phoneHomeRequestBody.getArtifactVersion();
         this.productId = phoneHomeRequestBody.getProductId();
@@ -67,22 +71,23 @@ public class GoogleAnalyticsRequestHelper {
         final Map<String, String> payloadData = new HashMap<>();
         payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
         payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, uniqueId);
+        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, createUUIDFromString(customerId));
         payloadData.put(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
         payloadData.put(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
 
         // Phone Home Parameters
-        payloadData.put(GoogleAnalyticsConstants.UNIQUE_ID, uniqueId);
+        payloadData.put(GoogleAnalyticsConstants.CUSTOMER_ID, customerId);
+        payloadData.put(GoogleAnalyticsConstants.HOST_NAME, hostName);
         payloadData.put(GoogleAnalyticsConstants.ARTIFACT_ID, artifactId);
         payloadData.put(GoogleAnalyticsConstants.ARTIFACT_VERSION, artifactVersion);
-        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId);
+        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId.getKey());
         payloadData.put(GoogleAnalyticsConstants.PRODUCT_VERSION, productVersion);
-        payloadData.put(GoogleAnalyticsConstants.META_DATA, encodeMetaData(metaData));
+        payloadData.put(GoogleAnalyticsConstants.META_DATA, formatMetaData(metaData));
 
         return payloadData;
     }
 
-    private String encodeMetaData(final Map<String, String> metaData) {
+    private String formatMetaData(final Map<String, String> metaData) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("{");
@@ -100,6 +105,11 @@ public class GoogleAnalyticsRequestHelper {
         builder.append("}");
 
         return builder.toString();
+    }
+
+    private String createUUIDFromString(final String str) {
+        final byte[] bytesFromString = str.getBytes();
+        return UUID.nameUUIDFromBytes(bytesFromString).toString();
     }
 
 }
