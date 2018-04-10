@@ -37,8 +37,6 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionB
 import com.blackducksoftware.integration.log.IntBufferedLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
-import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBodyBuilder;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
@@ -61,7 +59,7 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(),
                 restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
@@ -84,7 +82,7 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(),
                 restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
@@ -108,7 +106,7 @@ public class PhoneHomeClientUnitTest {
         final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(bufferedLogger, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");
@@ -146,7 +144,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void testPostBadPhoneHomeRequestBuilding() throws Exception {
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         try {
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
@@ -165,7 +163,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void validatePhoneHomeRequestBuilding() throws Exception {
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
         phoneHomeRequestBuilder.setArtifactId("artifactId");

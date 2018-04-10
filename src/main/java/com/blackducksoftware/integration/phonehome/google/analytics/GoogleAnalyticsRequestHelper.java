@@ -32,10 +32,12 @@ import org.apache.http.entity.ContentType;
 import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
 import com.blackducksoftware.integration.hub.rest.HttpMethod;
-import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBody;
+import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelper {
+    private final Gson gson;
     private final String trackingId;
 
     private final String customerId;
@@ -46,7 +48,8 @@ public class GoogleAnalyticsRequestHelper {
     private final String productVersion;
     private final Map<String, String> metaData;
 
-    public GoogleAnalyticsRequestHelper(final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+    public GoogleAnalyticsRequestHelper(final Gson gson, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+        this.gson = gson;
         this.trackingId = trackingId;
 
         this.customerId = phoneHomeRequestBody.getCustomerId();
@@ -80,31 +83,11 @@ public class GoogleAnalyticsRequestHelper {
         payloadData.put(GoogleAnalyticsConstants.HOST_NAME, hostName);
         payloadData.put(GoogleAnalyticsConstants.ARTIFACT_ID, artifactId);
         payloadData.put(GoogleAnalyticsConstants.ARTIFACT_VERSION, artifactVersion);
-        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId.getKey());
+        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId.name());
         payloadData.put(GoogleAnalyticsConstants.PRODUCT_VERSION, productVersion);
-        payloadData.put(GoogleAnalyticsConstants.META_DATA, formatMetaData(metaData));
+        payloadData.put(GoogleAnalyticsConstants.META_DATA, gson.toJson(metaData));
 
         return payloadData;
-    }
-
-    private String formatMetaData(final Map<String, String> metaData) {
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append("{");
-        for (final String key : metaData.keySet()) {
-            builder.append("\"");
-            builder.append(key);
-            builder.append("\":\"");
-            builder.append(metaData.get(key));
-            builder.append("\",");
-        }
-        final int lastComma = builder.lastIndexOf(",");
-        if (lastComma > 0) {
-            builder.deleteCharAt(lastComma);
-        }
-        builder.append("}");
-
-        return builder.toString();
     }
 
     private String createUUIDFromString(final String str) {

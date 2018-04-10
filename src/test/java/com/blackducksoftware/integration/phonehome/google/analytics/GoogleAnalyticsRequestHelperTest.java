@@ -26,8 +26,9 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionB
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.body.PhoneHomeRequestBodyBuilder;
+import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelperTest {
 
@@ -43,7 +44,7 @@ public class GoogleAnalyticsRequestHelperTest {
         builder.setTimeout(120);
         final RestConnection restConnection = builder.createConnection(proxyInfo);
 
-        final PhoneHomeRequestBodyBuilder bodyBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
         bodyBuilder.setCustomerId("fake_customer_id");
         bodyBuilder.setHostName("fake_host_name");
         bodyBuilder.setArtifactId("fake_artifact_id");
@@ -52,10 +53,11 @@ public class GoogleAnalyticsRequestHelperTest {
         bodyBuilder.setProductVersion("fake_product_version");
 
         bodyBuilder.addToMetaData("exampleMetaData_1", "data");
-        bodyBuilder.addToMetaData("exampleMetaData_2", "otherData");
-        bodyBuilder.addToMetaData("exampleMetaData_3", "moreData");
+        bodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+        bodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
+        bodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
 
         final Request request = helper.createRequest(debugUrl);
         intLogger.info("Request Body: " + request.getBodyContent().getBodyContentMap());

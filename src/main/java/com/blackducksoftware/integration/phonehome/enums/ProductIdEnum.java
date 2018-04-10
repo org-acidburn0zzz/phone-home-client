@@ -24,18 +24,9 @@
 package com.blackducksoftware.integration.phonehome.enums;
 
 public enum ProductIdEnum {
-    CODE_CENTER("Code-Center"),
-    COVERITY("Coverity"),
-    HUB("Hub"),
-    PROTEX("Protex");
+    CODE_CENTER,
+    COVERITY,
+    HUB,
+    PROTEX;
 
-    private final String key;
-
-    private ProductIdEnum(final String key) {
-        this.key = key;
-    }
-
-    public String getKey() {
-        return this.key;
-    }
 }
