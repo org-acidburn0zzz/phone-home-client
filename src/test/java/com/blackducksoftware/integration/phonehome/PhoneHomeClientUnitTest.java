@@ -37,10 +37,7 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionB
 import com.blackducksoftware.integration.log.IntBufferedLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEnum;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
@@ -62,15 +59,13 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(),
                 restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
-        phoneHomeRequestBuilder.setRegistrationId("regKey");
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
-        phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
-        phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
-        phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
-        phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.JENKINS);
-        phoneHomeRequestBuilder.setThirdPartyVersion("thirdPartyVersion");
-        phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
+        phoneHomeRequestBuilder.setArtifactId("artifactId");
+        phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
         phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
@@ -87,15 +82,13 @@ public class PhoneHomeClientUnitTest {
         final PhoneHomeClient phClient = new PhoneHomeClient(new IntBufferedLogger(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(),
                 restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
-        phoneHomeRequestBuilder.setRegistrationId(null);
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
-        phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
-        phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
-        phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
-        phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.JENKINS);
-        phoneHomeRequestBuilder.setThirdPartyVersion("thirdPartyVersion");
-        phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
+        phoneHomeRequestBuilder.setArtifactId("artifactId");
+        phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
         phClient.postPhoneHomeRequest(phoneHomeRequest, new CIEnvironmentVariables());
@@ -113,15 +106,13 @@ public class PhoneHomeClientUnitTest {
         final RestConnection restConnection = builder.build();
         final PhoneHomeClient phClient = new PhoneHomeClient(bufferedLogger, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, restConnection.timeout, restConnection.getProxyInfo(), restConnection.alwaysTrustServerCertificate);
 
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
-        phoneHomeRequestBuilder.setRegistrationId(null);
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
-        phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
-        phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
-        phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
-        phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.JENKINS);
-        phoneHomeRequestBuilder.setThirdPartyVersion("thirdPartyVersion");
-        phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
+        phoneHomeRequestBuilder.setArtifactId("artifactId");
+        phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
         final CIEnvironmentVariables environmentVariables = new CIEnvironmentVariables();
@@ -153,7 +144,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void testPostBadPhoneHomeRequestBuilding() throws Exception {
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         try {
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
@@ -161,8 +152,8 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
         try {
-            phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
-            phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.ARTIFACTORY);
+            phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
+            phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
             phoneHomeRequestBuilder.build();
             fail("Illegal state exception not thrown");
         } catch (final IllegalStateException e) {
@@ -172,32 +163,24 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void validatePhoneHomeRequestBuilding() throws Exception {
-        final PhoneHomeRequestBodyBuilder phoneHomeRequestBuilder = new PhoneHomeRequestBodyBuilder();
-        phoneHomeRequestBuilder.setRegistrationId("regKey");
+        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
+        phoneHomeRequestBuilder.setCustomerId("customerId");
         phoneHomeRequestBuilder.setHostName("hostName");
-        phoneHomeRequestBuilder.setBlackDuckName(BlackDuckName.HUB);
-        phoneHomeRequestBuilder.setBlackDuckVersion("blackDuckVersion");
-        phoneHomeRequestBuilder.setPluginVersion("pluginVersion");
-        phoneHomeRequestBuilder.setThirdPartyName(ThirdPartyName.JENKINS);
-        phoneHomeRequestBuilder.setThirdPartyVersion("thirdPartyVersion");
-        phoneHomeRequestBuilder.setSource(PhoneHomeSource.INTEGRATIONS);
-        phoneHomeRequestBuilder.addToMetaDataMap("some", "metadata");
-        final Map<String, String> builderInfoMap = phoneHomeRequestBuilder.getMetaDataMap();
-        builderInfoMap.put(PhoneHomeRequestFieldEnum.BLACKDUCKNAME.getKey(), phoneHomeRequestBuilder.getBlackDuckName());
-        builderInfoMap.put(PhoneHomeRequestFieldEnum.BLACKDUCKVERSION.getKey(), phoneHomeRequestBuilder.getBlackDuckVersion());
-        builderInfoMap.put(PhoneHomeRequestFieldEnum.THIRDPARTYNAME.getKey(), phoneHomeRequestBuilder.getThirdPartyName());
-        builderInfoMap.put(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION.getKey(), phoneHomeRequestBuilder.getThirdPartyVersion());
-        builderInfoMap.put(PhoneHomeRequestFieldEnum.PLUGINVERSION.getKey(), phoneHomeRequestBuilder.getPluginVersion());
+        phoneHomeRequestBuilder.setArtifactId("artifactId");
+        phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
+        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        phoneHomeRequestBuilder.setProductVersion("productVersion");
+        final Map<String, String> builderMetaData = phoneHomeRequestBuilder.getMetaData();
+        builderMetaData.put("example_meta_data", "data");
 
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        assertTrue(phoneHomeRequestBuilder.getRegistrationId().equals(phoneHomeRequest.getRegId()));
-        assertTrue(phoneHomeRequestBuilder.getSource().equals(phoneHomeRequest.getSource()));
-        assertTrue(builderInfoMap.equals((phoneHomeRequest.getInfoMap())));
-
-        phoneHomeRequestBuilder.setRegistrationId(null);
-        final PhoneHomeRequestBody phoneHomeRequestWithHost = phoneHomeRequestBuilder.build();
-        assertTrue(phoneHomeRequestBuilder.md5Hash(phoneHomeRequestBuilder.getHostName()).equals(phoneHomeRequestWithHost.getRegId()));
+        assertTrue(phoneHomeRequestBuilder.getCustomerId().equals(phoneHomeRequest.getCustomerId()));
+        assertTrue(phoneHomeRequestBuilder.getArtifactId().equals(phoneHomeRequest.getArtifactId()));
+        assertTrue(phoneHomeRequestBuilder.getArtifactVersion().equals(phoneHomeRequest.getArtifactVersion()));
+        assertTrue(phoneHomeRequestBuilder.getProductId().equals(phoneHomeRequest.getProductId()));
+        assertTrue(phoneHomeRequestBuilder.getProductVersion().equals(phoneHomeRequest.getProductVersion()));
+        assertTrue(builderMetaData.equals((phoneHomeRequest.getMetaData())));
     }
 
     @Test

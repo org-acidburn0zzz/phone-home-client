@@ -9,7 +9,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Black Duck Software.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.blackducksoftware.integration.phonehome.google.analytics;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,11 +26,9 @@ import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionB
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
+import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelperTest {
 
@@ -46,10 +44,23 @@ public class GoogleAnalyticsRequestHelperTest {
         builder.setTimeout(120);
         final RestConnection restConnection = builder.createConnection(proxyInfo);
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, "ph_client_test_reg_id", "ph_client_test_host_name", PhoneHomeSource.INTEGRATIONS,
-                BlackDuckName.HUB, "ph_client_test_black_duck_version", ThirdPartyName.ALERT, "ph_client_test_third_party_version", "ph_client_test_plugin_version");
+        final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
+        bodyBuilder.setCustomerId("fake_customer_id");
+        bodyBuilder.setHostName("fake_host_name");
+        bodyBuilder.setArtifactId("fake_artifact_id");
+        bodyBuilder.setArtifactVersion("fake_artifact_version");
+        bodyBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        bodyBuilder.setProductVersion("fake_product_version");
 
-        final Request request = helper.createRequest();
+        bodyBuilder.addToMetaData("exampleMetaData_1", "data");
+        bodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+        bodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
+        bodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
+
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
+
+        final Request request = helper.createRequest(debugUrl);
+        intLogger.info("Request Body: " + request.getBodyContent().getBodyContentMap());
 
         int responseCode = -1;
         String responseContent = "null";

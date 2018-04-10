@@ -36,33 +36,37 @@ import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 import com.blackducksoftware.integration.util.CIEnvironmentVariables;
+import com.google.gson.Gson;
 
 public class PhoneHomeClient {
     public static final String SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
+
     private final IntLogger logger;
     private final String googleAnalyticsTrackingId;
     private final String phoneHomeBackendUrl;
     private final int timeout;
     private final ProxyInfo proxyInfo;
     private final boolean alwaysTrustServerCertificate;
+    private final Gson gson;
 
     public PhoneHomeClient(final IntLogger logger, final String googleAnalyticsTrackingId, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
+        this(logger, googleAnalyticsTrackingId, timeout, proxyInfo, alwaysTrustServerCertificate, new Gson());
+    }
+
+    public PhoneHomeClient(final IntLogger logger, final String googleAnalyticsTrackingId, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate, final Gson gson) {
         this.logger = logger;
         this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
         this.phoneHomeBackendUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
         this.timeout = timeout;
         this.proxyInfo = proxyInfo;
         this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
-
+        this.gson = gson;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final CIEnvironmentVariables environmentVariables) throws PhoneHomeException {
-        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
-            final Boolean skipPhoneHome = Boolean.valueOf(environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE));
-            if (skipPhoneHome) {
-                logger.debug("Skipping phone home");
-                return;
-            }
+        if (skipPhoneHome(environmentVariables)) {
+            logger.debug("Skipping phone home");
+            return;
         }
         if (phoneHomeRequestBody == null) {
             throw new PhoneHomeException("The request body must not be null.");
@@ -77,16 +81,22 @@ public class PhoneHomeClient {
         builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
 
-        final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(phoneHomeBackendUrl, googleAnalyticsTrackingId, phoneHomeRequestBody);
-        final Request request = requestHelper.createRequest();
+        final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson, googleAnalyticsTrackingId, phoneHomeRequestBody);
+        final Request request = requestHelper.createRequest(phoneHomeBackendUrl);
 
         try (Response response = restConnection.executeRequest(request)) {
             logger.trace("Google Analytics Response Code: " + response.getStatusCode());
-        } catch (final IOException ioEx) {
-            throw new PhoneHomeException(ioEx.getMessage(), ioEx);
-        } catch (final IntegrationException intEx) {
-            throw new PhoneHomeException(intEx.getMessage(), intEx);
+        } catch (final IntegrationException | IOException requestException) {
+            throw new PhoneHomeException(requestException.getMessage(), requestException);
         }
+    }
+
+    private boolean skipPhoneHome(final CIEnvironmentVariables environmentVariables) {
+        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
+            final String valueString = environmentVariables.getValue(SKIP_PHONE_HOME_VARIABLE);
+            return Boolean.valueOf(valueString).booleanValue();
+        }
+        return false;
     }
 
 }

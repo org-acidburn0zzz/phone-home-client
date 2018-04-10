@@ -33,60 +33,37 @@ import com.blackducksoftware.integration.hub.request.BodyContent;
 import com.blackducksoftware.integration.hub.request.Request;
 import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
-import com.blackducksoftware.integration.phonehome.enums.BlackDuckName;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeRequestFieldEnum;
-import com.blackducksoftware.integration.phonehome.enums.PhoneHomeSource;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
+import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelper {
-    private final String collectUrl;
+    private final Gson gson;
     private final String trackingId;
 
-    private final String regId;
+    private final String customerId;
     private final String hostName;
-    private final String source;
+    private final String artifactId;
+    private final String artifactVersion;
+    private final ProductIdEnum productId;
+    private final String productVersion;
+    private final Map<String, String> metaData;
 
-    private final String blackDuckName;
-    private final String blackDuckVersion;
-    private final String thirdPartyName;
-    private final String thirdPartyVersion;
-    private final String pluginVersion;
-
-    public GoogleAnalyticsRequestHelper(final String collectUrl, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
-        this.collectUrl = collectUrl;
+    public GoogleAnalyticsRequestHelper(final Gson gson, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+        this.gson = gson;
         this.trackingId = trackingId;
 
-        this.regId = phoneHomeRequestBody.getRegId();
+        this.customerId = phoneHomeRequestBody.getCustomerId();
         this.hostName = phoneHomeRequestBody.getHostName();
-        this.source = phoneHomeRequestBody.getSource();
-
-        final Map<String, String> infoMap = phoneHomeRequestBody.getInfoMap();
-        this.blackDuckName = infoMap.get(PhoneHomeRequestFieldEnum.BLACKDUCKNAME.getKey());
-        this.blackDuckVersion = infoMap.get(PhoneHomeRequestFieldEnum.BLACKDUCKVERSION.getKey());
-        this.thirdPartyName = infoMap.get(PhoneHomeRequestFieldEnum.THIRDPARTYNAME.getKey());
-        this.thirdPartyVersion = infoMap.get(PhoneHomeRequestFieldEnum.THIRDPARTYVERSION.getKey());
-        this.pluginVersion = infoMap.get(PhoneHomeRequestFieldEnum.PLUGINVERSION.getKey());
+        this.artifactId = phoneHomeRequestBody.getArtifactId();
+        this.artifactVersion = phoneHomeRequestBody.getArtifactVersion();
+        this.productId = phoneHomeRequestBody.getProductId();
+        this.productVersion = phoneHomeRequestBody.getProductVersion();
+        this.metaData = phoneHomeRequestBody.getMetaData();
     }
 
-    public GoogleAnalyticsRequestHelper(final String collectUrl, final String trackingId, final String regId, final String hostName, final PhoneHomeSource source, final BlackDuckName blackDuckName, final String blackDuckVersion,
-            final ThirdPartyName thirdPartyName, final String thirdPartyVersion, final String pluginVersion) {
-        this.collectUrl = collectUrl;
-        this.trackingId = trackingId;
-
-        this.regId = regId;
-        this.hostName = hostName;
-        this.source = source.getName();
-
-        this.blackDuckName = blackDuckName.getName();
-        this.blackDuckVersion = blackDuckVersion;
-        this.thirdPartyName = thirdPartyName.getName();
-        this.thirdPartyVersion = thirdPartyVersion;
-        this.pluginVersion = pluginVersion;
-    }
-
-    public Request createRequest() {
+    public Request createRequest(final String url) {
         final BodyContent body = new BodyContent(getPayloadDataMap());
-        return new Request.Builder(collectUrl)
+        return new Request.Builder(url)
                 .mimeType(ContentType.TEXT_PLAIN.getMimeType())
                 .method(HttpMethod.POST)
                 .bodyContent(body)
@@ -97,21 +74,25 @@ public class GoogleAnalyticsRequestHelper {
         final Map<String, String> payloadData = new HashMap<>();
         payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
         payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, UUID.nameUUIDFromBytes(hostName.getBytes()).toString());
+        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, createUUIDFromString(customerId));
         payloadData.put(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
         payloadData.put(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
 
         // Phone Home Parameters
-        payloadData.put(GoogleAnalyticsConstants.REGISTRATION_ID_KEY, regId);
-        payloadData.put(GoogleAnalyticsConstants.HOST_NAME_KEY, hostName);
-        payloadData.put(GoogleAnalyticsConstants.BLACK_DUCK_NAME_KEY, blackDuckName);
-        payloadData.put(GoogleAnalyticsConstants.BLACK_DUCK_VERSION_KEY, blackDuckVersion);
-        payloadData.put(GoogleAnalyticsConstants.THIRD_PARTY_NAME_KEY, thirdPartyName);
-        payloadData.put(GoogleAnalyticsConstants.THIRD_PARTY_VERSION_KEY, thirdPartyVersion);
-        payloadData.put(GoogleAnalyticsConstants.PLUGIN_VERSION_KEY, pluginVersion);
-        payloadData.put(GoogleAnalyticsConstants.SOURCE_KEY, source);
+        payloadData.put(GoogleAnalyticsConstants.CUSTOMER_ID, customerId);
+        payloadData.put(GoogleAnalyticsConstants.HOST_NAME, hostName);
+        payloadData.put(GoogleAnalyticsConstants.ARTIFACT_ID, artifactId);
+        payloadData.put(GoogleAnalyticsConstants.ARTIFACT_VERSION, artifactVersion);
+        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId.name());
+        payloadData.put(GoogleAnalyticsConstants.PRODUCT_VERSION, productVersion);
+        payloadData.put(GoogleAnalyticsConstants.META_DATA, gson.toJson(metaData));
 
         return payloadData;
+    }
+
+    private String createUUIDFromString(final String str) {
+        final byte[] bytesFromString = str.getBytes();
+        return UUID.nameUUIDFromBytes(bytesFromString).toString();
     }
 
 }

@@ -23,25 +23,10 @@
  */
 package com.blackducksoftware.integration.phonehome.enums;
 
-import com.blackducksoftware.integration.validator.FieldEnum;
+public enum ProductIdEnum {
+    CODE_CENTER,
+    COVERITY,
+    HUB,
+    PROTEX;
 
-public enum PhoneHomeRequestFieldEnum implements FieldEnum {
-    BLACKDUCKNAME("blackDuckName"),
-    BLACKDUCKVERSION("blackDuckVersion"),
-    HOSTNAME("hostName"),
-    PLUGINVERSION("pluginVersion"),
-    REGID("regId"),
-    THIRDPARTYNAME("thirdPartyName"),
-    THIRDPARTYVERSION("thirdPartyVersion");
-
-    private String key;
-
-    private PhoneHomeRequestFieldEnum(final String key) {
-        this.key = key;
-    }
-
-    @Override
-    public String getKey() {
-        return key;
-    }
 }
