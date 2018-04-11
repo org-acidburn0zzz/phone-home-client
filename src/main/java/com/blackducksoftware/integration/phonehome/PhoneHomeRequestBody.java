@@ -86,6 +86,8 @@ public class PhoneHomeRequestBody {
     }
 
     public static class Builder {
+        public static final String UNKNOWN_ID = "<unknown>";
+
         private String customerId;
         private String hostName;
         private String artifactId;

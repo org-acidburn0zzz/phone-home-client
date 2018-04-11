@@ -72,9 +72,10 @@ public class GoogleAnalyticsRequestHelper {
 
     private Map<String, String> getPayloadDataMap() {
         final Map<String, String> payloadData = new HashMap<>();
+
         payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
         payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, createUUIDFromString(customerId));
+        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, generateClientId());
         payloadData.put(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
         payloadData.put(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
 
@@ -90,8 +91,17 @@ public class GoogleAnalyticsRequestHelper {
         return payloadData;
     }
 
-    private String createUUIDFromString(final String str) {
-        final byte[] bytesFromString = str.getBytes();
+    private String generateClientId() {
+        String clientId;
+        if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
+            clientId = customerId;
+        } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
+            clientId = hostName;
+        } else {
+            clientId = PhoneHomeRequestBody.Builder.UNKNOWN_ID;
+        }
+
+        final byte[] bytesFromString = clientId.getBytes();
         return UUID.nameUUIDFromBytes(bytesFromString).toString();
     }
 
