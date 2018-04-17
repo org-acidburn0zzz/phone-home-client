@@ -13,36 +13,34 @@ package com.blackducksoftware.integration.phonehome.google.analytics;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.request.Request;
-import com.blackducksoftware.integration.hub.request.Response;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.blackducksoftware.integration.phonehome.mock.MockLogger;
 import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelperTest {
+    private static final MockLogger logger = new MockLogger();
+
+    @Before
+    public void init() {
+        logger.info("\n");
+        logger.info("Test Class: GoogleAnalyticsRequestHelperTest");
+    }
 
     @Test
-    public void basicRequestTest() throws IOException, IntegrationException {
-        final IntLogger intLogger = new PrintStreamIntLogger(System.out, LogLevel.DEBUG);
-        final ProxyInfo proxyInfo = new ProxyInfo("", 0, null, "", null, null);
+    public void basicRequestTest() throws IOException {
         final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
-
-        final UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
-        builder.setLogger(intLogger);
-        builder.setBaseUrl(debugUrl);
-        builder.setTimeout(120);
-        final RestConnection restConnection = builder.createConnection(proxyInfo);
 
         final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
         bodyBuilder.setCustomerId("fake_customer_id");
@@ -59,18 +57,23 @@ public class GoogleAnalyticsRequestHelperTest {
 
         final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
 
-        final Request request = helper.createRequest(debugUrl);
-        intLogger.info("Request Body: " + request.getBodyContent().getBodyContentMap());
+        final HttpPost request = helper.createRequest(debugUrl);
+
+        final HttpClient client = HttpClientBuilder.create().build();
 
         int responseCode = -1;
-        String responseContent = "null";
-        try (final Response response = restConnection.executeRequest(request)) {
-            responseCode = response.getStatusCode();
-            responseContent = response.getContentString();
+        final HttpResponse response = client.execute(request);
+        responseCode = response.getStatusLine().getStatusCode();
+        logger.info("Response Code: " + responseCode);
+
+        String nextLine;
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+        logger.info("Response String:");
+        while ((nextLine = reader.readLine()) != null) {
+            logger.info(nextLine);
         }
 
-        intLogger.info("Response Code: " + responseCode);
-        intLogger.info("Response String:\n" + responseContent);
         assertEquals(200, responseCode);
     }
 

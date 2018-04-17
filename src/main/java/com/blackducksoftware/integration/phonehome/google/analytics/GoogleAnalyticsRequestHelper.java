@@ -23,15 +23,19 @@
  */
 package com.blackducksoftware.integration.phonehome.google.analytics;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.apache.http.entity.ContentType;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 
-import com.blackducksoftware.integration.hub.request.BodyContent;
-import com.blackducksoftware.integration.hub.request.Request;
-import com.blackducksoftware.integration.hub.rest.HttpMethod;
 import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.google.gson.Gson;
@@ -61,13 +65,18 @@ public class GoogleAnalyticsRequestHelper {
         this.metaData = phoneHomeRequestBody.getMetaData();
     }
 
-    public Request createRequest(final String url) {
-        final BodyContent body = new BodyContent(getPayloadDataMap());
-        return new Request.Builder(url)
-                .mimeType(ContentType.TEXT_PLAIN.getMimeType())
-                .method(HttpMethod.POST)
-                .bodyContent(body)
-                .build();
+    public HttpPost createRequest(final String url) throws UnsupportedEncodingException {
+        final HttpPost post = new HttpPost(url);
+
+        final List<NameValuePair> parameters = new ArrayList<>();
+        for (final Entry<String, String> entry : getPayloadDataMap().entrySet()) {
+            final NameValuePair nameValuePair = new BasicNameValuePair(entry.getKey(), entry.getValue());
+            parameters.add(nameValuePair);
+        }
+        post.setEntity(new UrlEncodedFormEntity(parameters));
+        // TODO post.addHeader(HttpHeaders.ACCEPT, ContentType.TEXT_PLAIN.getMimeType());
+
+        return post;
     }
 
     private Map<String, String> getPayloadDataMap() {
