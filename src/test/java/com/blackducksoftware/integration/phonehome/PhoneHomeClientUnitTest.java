@@ -17,8 +17,11 @@ import static org.junit.Assert.fail;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,12 +31,12 @@ import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.phonehome.mock.MockLogger;
+import com.google.gson.Gson;
 
 public class PhoneHomeClientUnitTest {
-    public static final int TIMEOUT = 5;
+    private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.empty()).build();
 
     private Map<String, String> defualtEnvironmentVariables;
-    private HttpHost proxyHost;
     private PhoneHomeClient defaultClient;
 
     @Before
@@ -43,8 +46,7 @@ public class PhoneHomeClientUnitTest {
         logger.info("Test Class: PhoneHomeClientUnitTest");
         defualtEnvironmentVariables = new HashMap<>();
         defualtEnvironmentVariables.put(PhoneHomeClient.PHONE_HOME_URL_OVERRIDE_VARIABLE, GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT);
-        proxyHost = null;
-        defaultClient = new PhoneHomeClient(logger, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, TIMEOUT, proxyHost);
+        defaultClient = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
     }
 
     @Rule
@@ -81,7 +83,7 @@ public class PhoneHomeClientUnitTest {
     @Test
     public void callHomeSkip() throws Exception {
         final MockLogger logger = new MockLogger();
-        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(logger, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, TIMEOUT, proxyHost);
+        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, DEFAULT_REQUEST_CONFIG, logger);
 
         final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
@@ -161,13 +163,51 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void validateBadPhoneHomeBackend() throws Exception {
-        final PhoneHomeClient phClient = new PhoneHomeClient(null, 0, null);
+        PhoneHomeClient phClient = new PhoneHomeClient(null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
         } catch (final PhoneHomeException e) {
             // Do nothing
         }
+
+        phClient = new PhoneHomeClient(null, (RequestConfig) null);
+        try {
+            phClient.postPhoneHomeRequest(null, Collections.emptyMap());
+            fail("Phone home exception not thrown");
+        } catch (final PhoneHomeException e) {
+            // Do nothing
+        }
+
+        phClient = new PhoneHomeClient(null, (CloseableHttpClient) null);
+        try {
+            phClient.postPhoneHomeRequest(null, Collections.emptyMap());
+            fail("Phone home exception not thrown");
+        } catch (final PhoneHomeException e) {
+            // Do nothing
+        }
+
+        phClient = new PhoneHomeClient(null, (RequestConfig) null, (Gson) null);
+        try {
+            phClient.postPhoneHomeRequest(null, Collections.emptyMap());
+            fail("Phone home exception not thrown");
+        } catch (final PhoneHomeException e) {
+            // Do nothing
+        }
+
+        phClient = new PhoneHomeClient(null, (CloseableHttpClient) null, (Gson) null);
+        try {
+            phClient.postPhoneHomeRequest(null, Collections.emptyMap());
+            fail("Phone home exception not thrown");
+        } catch (final PhoneHomeException e) {
+            // Do nothing
+        }
+    }
+
+    @Test
+    public void createInitialRequestConfigBuilderWithProxyHostTest() {
+        final HttpHost proxyHost = new HttpHost("localhost:8081");
+        PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.of(proxyHost));
     }
 
 }
