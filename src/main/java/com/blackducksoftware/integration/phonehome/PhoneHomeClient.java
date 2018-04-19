@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.phonehome;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -45,33 +46,51 @@ public class PhoneHomeClient {
     public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "BLACKDUCK_PHONE_HOME_URL_OVERRIDE";
 
     private final String googleAnalyticsTrackingId;
-    private final int timeout;
-    private final HttpHost proxyHost;
+    private final CloseableHttpClient httpClient;
+    private final Logger logger;
     private final Gson gson;
 
     private String phoneHomeBackendUrl;
-    private final Logger logger;
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final int timeout, final HttpHost proxyHost) {
-        this(LoggerFactory.getLogger(PhoneHomeClient.class), googleAnalyticsTrackingId, timeout, proxyHost, new Gson());
+    public PhoneHomeClient(final String googleAnalyticsTrackingId) {
+        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), LoggerFactory.getLogger(PhoneHomeClient.class));
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final int timeout, final HttpHost proxyHost, final Gson gson) {
-        this(LoggerFactory.getLogger(PhoneHomeClient.class), googleAnalyticsTrackingId, timeout, proxyHost, gson);
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig) {
+        this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), new Gson());
     }
 
-    public PhoneHomeClient(final Logger logger, final String googleAnalyticsTrackingId, final int timeout, final HttpHost proxyHost) {
-        this(logger, googleAnalyticsTrackingId, timeout, proxyHost, new Gson());
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Gson gson) {
+        this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
     }
 
-    public PhoneHomeClient(final Logger logger, final String googleAnalyticsTrackingId, final int timeout, final HttpHost proxyHost, final Gson gson) {
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger) {
+        this(googleAnalyticsTrackingId, httpRequestConfig, logger, new Gson());
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger, final Gson gson) {
+        this(googleAnalyticsTrackingId, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig).build(), logger, gson);
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient) {
+        this(googleAnalyticsTrackingId, httpClient, LoggerFactory.getLogger(PhoneHomeClient.class));
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Logger logger) {
+        this(googleAnalyticsTrackingId, httpClient, logger, new Gson());
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Gson gson) {
+        this(googleAnalyticsTrackingId, httpClient, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Logger logger, final Gson gson) {
         this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
-        this.timeout = timeout;
-        this.proxyHost = proxyHost;
+        this.httpClient = httpClient;
+        this.logger = logger;
         this.gson = gson;
 
         this.phoneHomeBackendUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
-        this.logger = logger;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) throws PhoneHomeException {
@@ -85,7 +104,7 @@ public class PhoneHomeClient {
         checkOverridePhoneHomeUrl(environmentVariables);
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
 
-        try (final CloseableHttpClient client = createHttpClient()) {
+        try (final CloseableHttpClient client = httpClient) {
             final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson, googleAnalyticsTrackingId, phoneHomeRequestBody);
             final HttpUriRequest request = requestHelper.createRequest(phoneHomeBackendUrl);
 
@@ -94,6 +113,18 @@ public class PhoneHomeClient {
         } catch (final Exception e) {
             throw new PhoneHomeException(e.getMessage(), e);
         }
+    }
+
+    public static RequestConfig.Builder createInitialRequestConfigBuilder(final int timeoutSeconds, final Optional<HttpHost> proxyHost) {
+        final int timeoutInMillis = timeoutSeconds * 1000;
+        final RequestConfig.Builder builder = RequestConfig.custom();
+        builder.setConnectionRequestTimeout(timeoutInMillis);
+        builder.setConnectTimeout(timeoutInMillis);
+        builder.setSocketTimeout(timeoutInMillis);
+        if (proxyHost.isPresent()) {
+            builder.setProxy(proxyHost.get());
+        }
+        return builder;
     }
 
     private boolean skipPhoneHome(final Map<String, String> environmentVariables) {
@@ -112,20 +143,6 @@ public class PhoneHomeClient {
                 logger.debug("Overriding Phone-Home URL: " + overrideUrl);
             }
         }
-    }
-
-    private CloseableHttpClient createHttpClient() {
-        final RequestConfig.Builder configBuilder = RequestConfig.custom();
-        configBuilder.setConnectionRequestTimeout(timeout * 1000);
-        configBuilder.setConnectTimeout(timeout * 1000);
-        configBuilder.setSocketTimeout(timeout * 1000);
-        if (proxyHost != null) {
-            configBuilder.setProxy(proxyHost);
-        }
-
-        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        clientBuilder.setDefaultRequestConfig(configBuilder.build());
-        return clientBuilder.build();
     }
 
 }
