@@ -99,14 +99,14 @@ public class PhoneHomeRequestBody {
         // PhoneHomeRequestBody only has a private constructor to force creation through the builder.
         @SuppressWarnings("synthetic-access")
         public PhoneHomeRequestBody build() throws IllegalStateException {
-            validateParam(customerId, "customerId");
-            validateParam(hostName, "hostName");
-            validateParam(artifactId, "artifactId");
-            validateParam(artifactVersion, "artifactVersion");
+            validateRequiredParam(customerId, "customerId");
+            validateRequiredParam(hostName, "hostName");
+            validateRequiredParam(artifactId, "artifactId");
+            validateRequiredParam(artifactVersion, "artifactVersion");
             if (productId == null) {
                 throw new IllegalStateException("Required parameter 'productId' is not set");
             }
-            validateParam(productVersion, "productVersion");
+            validateRequiredParam(productVersion, "productVersion");
             return new PhoneHomeRequestBody(this);
         }
 
@@ -172,7 +172,7 @@ public class PhoneHomeRequestBody {
             return DigestUtils.md5Hex(hashedBytes);
         }
 
-        private void validateParam(final String param, final String paramName) throws IllegalStateException {
+        private void validateRequiredParam(final String param, final String paramName) throws IllegalStateException {
             if (StringUtils.isBlank(param)) {
                 throw new IllegalStateException("Required parameter '" + paramName + "' is not set");
             }
