@@ -56,6 +56,18 @@ public class PhoneHomeClient {
         this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), LoggerFactory.getLogger(PhoneHomeClient.class));
     }
 
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger) {
+        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger);
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Gson gson) {
+        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), gson);
+    }
+
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger, final Gson gson) {
+        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger, gson);
+    }
+
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig) {
         this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), new Gson());
     }
