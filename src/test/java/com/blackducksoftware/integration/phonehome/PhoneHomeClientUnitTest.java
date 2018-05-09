@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -179,7 +179,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (CloseableHttpClient) null);
+        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -195,7 +195,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (CloseableHttpClient) null, (Gson) null);
+        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null, (Gson) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");

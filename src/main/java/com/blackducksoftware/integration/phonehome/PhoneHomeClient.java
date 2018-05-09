@@ -23,7 +23,6 @@
  */
 package com.blackducksoftware.integration.phonehome;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,76 +46,63 @@ public class PhoneHomeClient {
     public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "BLACKDUCK_PHONE_HOME_URL_OVERRIDE";
 
     private final String googleAnalyticsTrackingId;
-    private final CloseableHttpClient httpClient;
+    private final HttpClientBuilder httpClientBuilder;
     private final Logger logger;
     private final Gson gson;
-    private boolean shouldCloseClient;
 
     private String phoneHomeBackendUrl;
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId) {
         this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), LoggerFactory.getLogger(PhoneHomeClient.class));
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger) {
         this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger);
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final Gson gson) {
         this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), gson);
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger, final Gson gson) {
         this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger, gson);
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig) {
         this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), new Gson());
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Gson gson) {
         this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger) {
         this(googleAnalyticsTrackingId, httpRequestConfig, logger, new Gson());
-        shouldCloseClient = true;
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger, final Gson gson) {
-        this(googleAnalyticsTrackingId, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig).build(), logger, gson);
-        shouldCloseClient = true;
+        this(googleAnalyticsTrackingId, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig), logger, gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient) {
-        this(googleAnalyticsTrackingId, httpClient, LoggerFactory.getLogger(PhoneHomeClient.class));
-        shouldCloseClient = false;
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder) {
+        this(googleAnalyticsTrackingId, httpClientBuilder, LoggerFactory.getLogger(PhoneHomeClient.class));
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Logger logger) {
-        this(googleAnalyticsTrackingId, httpClient, logger, new Gson());
-        shouldCloseClient = false;
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Logger logger) {
+        this(googleAnalyticsTrackingId, httpClientBuilder, logger, new Gson());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Gson gson) {
-        this(googleAnalyticsTrackingId, httpClient, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
-        shouldCloseClient = false;
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Gson gson) {
+        this(googleAnalyticsTrackingId, httpClientBuilder, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final CloseableHttpClient httpClient, final Logger logger, final Gson gson) {
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Logger logger, final Gson gson) {
         this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
-        this.httpClient = httpClient;
+        this.httpClientBuilder = httpClientBuilder;
         this.logger = logger;
         this.gson = gson;
 
         this.phoneHomeBackendUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
-        shouldCloseClient = false;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) throws PhoneHomeException {
@@ -130,8 +116,7 @@ public class PhoneHomeClient {
         checkOverridePhoneHomeUrl(environmentVariables);
         logger.debug("Phoning home to " + phoneHomeBackendUrl);
 
-        try {
-            final CloseableHttpClient client = httpClient;
+        try (final CloseableHttpClient client = httpClientBuilder.build()) {
             final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson, googleAnalyticsTrackingId, phoneHomeRequestBody);
             final HttpUriRequest request = requestHelper.createRequest(phoneHomeBackendUrl);
 
@@ -139,14 +124,6 @@ public class PhoneHomeClient {
             logger.trace("Response Code: " + response.getStatusLine().getStatusCode());
         } catch (final Exception e) {
             throw new PhoneHomeException(e.getMessage(), e);
-        } finally {
-            if (shouldCloseClient) {
-                try {
-                    httpClient.close();
-                } catch (final IOException e) {
-                    throw new PhoneHomeException(e.getMessage(), e);
-                }
-            }
         }
     }
 
