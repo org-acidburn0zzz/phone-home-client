@@ -24,13 +24,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.blackducksoftware.integration.log.LogLevel;
+import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
-import com.blackducksoftware.integration.phonehome.mock.MockLogger;
 import com.google.gson.Gson;
 
 public class GoogleAnalyticsRequestHelperTest {
-    private static final MockLogger logger = new MockLogger();
+    private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
 
     @Before
     public void init() {

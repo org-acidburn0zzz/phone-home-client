@@ -26,6 +26,7 @@ package com.blackducksoftware.integration.phonehome;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -33,70 +34,47 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 import com.google.gson.Gson;
 
 public class PhoneHomeClient {
-    public static final String SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
-    public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "BLACKDUCK_PHONE_HOME_URL_OVERRIDE";
+    public static final String BLACKDUCK_SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
+    public static final String BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE = "BLACKDUCK_PHONE_HOME_URL_OVERRIDE";
+    public static final String SKIP_PHONE_HOME_VARIABLE = "SKIP_PHONE_HOME";
+    public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "PHONE_HOME_URL_OVERRIDE";
 
     private final String googleAnalyticsTrackingId;
     private final HttpClientBuilder httpClientBuilder;
-    private final Logger logger;
+    private final IntLogger logger;
     private final Gson gson;
 
     private String phoneHomeBackendUrl;
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId) {
-        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), LoggerFactory.getLogger(PhoneHomeClient.class));
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger) {
+        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10, Optional.empty()).build());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger) {
-        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger);
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final Gson gson) {
+        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10, Optional.empty()).build(), gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Gson gson) {
-        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), gson);
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final RequestConfig httpRequestConfig) {
+        this(googleAnalyticsTrackingId, logger, httpRequestConfig, new Gson());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final Logger logger, final Gson gson) {
-        this(googleAnalyticsTrackingId, createInitialRequestConfigBuilder(10, Optional.empty()).build(), logger, gson);
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final RequestConfig httpRequestConfig, final Gson gson) {
+        this(googleAnalyticsTrackingId, logger, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig), gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig) {
-        this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), new Gson());
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final HttpClientBuilder httpClientBuilder) {
+        this(googleAnalyticsTrackingId, logger, httpClientBuilder, new Gson());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Gson gson) {
-        this(googleAnalyticsTrackingId, httpRequestConfig, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger) {
-        this(googleAnalyticsTrackingId, httpRequestConfig, logger, new Gson());
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final RequestConfig httpRequestConfig, final Logger logger, final Gson gson) {
-        this(googleAnalyticsTrackingId, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig), logger, gson);
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder) {
-        this(googleAnalyticsTrackingId, httpClientBuilder, LoggerFactory.getLogger(PhoneHomeClient.class));
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Logger logger) {
-        this(googleAnalyticsTrackingId, httpClientBuilder, logger, new Gson());
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Gson gson) {
-        this(googleAnalyticsTrackingId, httpClientBuilder, LoggerFactory.getLogger(PhoneHomeClient.class), gson);
-    }
-
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final HttpClientBuilder httpClientBuilder, final Logger logger, final Gson gson) {
+    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final HttpClientBuilder httpClientBuilder, final Gson gson) {
         this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
         this.httpClientBuilder = httpClientBuilder;
         this.logger = logger;
@@ -140,16 +118,22 @@ public class PhoneHomeClient {
     }
 
     private boolean skipPhoneHome(final Map<String, String> environmentVariables) {
-        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE)) {
-            final String valueString = environmentVariables.get(SKIP_PHONE_HOME_VARIABLE);
-            return Boolean.valueOf(valueString).booleanValue();
+        if (environmentVariables.containsKey(SKIP_PHONE_HOME_VARIABLE) || environmentVariables.containsKey(BLACKDUCK_SKIP_PHONE_HOME_VARIABLE)) {
+            String valueString = environmentVariables.get(SKIP_PHONE_HOME_VARIABLE);
+            if (StringUtils.isBlank(valueString)) {
+                valueString = environmentVariables.get(BLACKDUCK_SKIP_PHONE_HOME_VARIABLE);
+            }
+            return BooleanUtils.toBoolean(valueString);
         }
         return false;
     }
 
     private void checkOverridePhoneHomeUrl(final Map<String, String> environmentVariables) {
-        if (environmentVariables.containsKey(PHONE_HOME_URL_OVERRIDE_VARIABLE)) {
-            final String overrideUrl = environmentVariables.get(PHONE_HOME_URL_OVERRIDE_VARIABLE);
+        if (environmentVariables.containsKey(PHONE_HOME_URL_OVERRIDE_VARIABLE) || environmentVariables.containsKey(BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE)) {
+            String overrideUrl = environmentVariables.get(PHONE_HOME_URL_OVERRIDE_VARIABLE);
+            if (StringUtils.isBlank(overrideUrl)) {
+                overrideUrl = environmentVariables.get(BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE);
+            }
             if (StringUtils.isNotBlank(overrideUrl)) {
                 phoneHomeBackendUrl = overrideUrl;
                 logger.debug("Overriding Phone-Home URL: " + overrideUrl);

@@ -27,10 +27,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.blackducksoftware.integration.log.IntBufferedLogger;
+import com.blackducksoftware.integration.log.LogLevel;
+import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
-import com.blackducksoftware.integration.phonehome.mock.MockLogger;
 import com.google.gson.Gson;
 
 public class PhoneHomeClientUnitTest {
@@ -41,12 +43,12 @@ public class PhoneHomeClientUnitTest {
 
     @Before
     public void init() {
-        final MockLogger logger = new MockLogger();
+        final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
         logger.info("\n");
         logger.info("Test Class: PhoneHomeClientUnitTest");
         defualtEnvironmentVariables = new HashMap<>();
         defualtEnvironmentVariables.put(PhoneHomeClient.PHONE_HOME_URL_OVERRIDE_VARIABLE, GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT);
-        defaultClient = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        defaultClient = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger);
     }
 
     @Rule
@@ -82,8 +84,8 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeSkip() throws Exception {
-        final MockLogger logger = new MockLogger();
-        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, DEFAULT_REQUEST_CONFIG, logger);
+        final IntBufferedLogger logger = new IntBufferedLogger();
+        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger, DEFAULT_REQUEST_CONFIG);
 
         final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
@@ -97,12 +99,12 @@ public class PhoneHomeClientUnitTest {
         defualtEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");
 
         clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
-        assertTrue(logger.doLogsContainText("Skipping phone home"));
+        assertTrue(logger.getOutputString(LogLevel.DEBUG).contains("Skipping phone home"));
 
         defualtEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "false");
 
         clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
-        assertTrue(logger.doLogsContainText("Phoning home to "));
+        assertTrue(logger.getOutputString(LogLevel.DEBUG).contains("Phoning home to "));
     }
 
     @Test
@@ -163,7 +165,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void validateBadPhoneHomeBackend() throws Exception {
-        PhoneHomeClient phClient = new PhoneHomeClient(null);
+        PhoneHomeClient phClient = new PhoneHomeClient(null, null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -171,7 +173,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (RequestConfig) null);
+        phClient = new PhoneHomeClient(null, null, (RequestConfig) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -179,7 +181,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null);
+        phClient = new PhoneHomeClient(null, null, (HttpClientBuilder) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -187,7 +189,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (RequestConfig) null, (Gson) null);
+        phClient = new PhoneHomeClient(null, null, (RequestConfig) null, (Gson) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -195,7 +197,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null, (Gson) null);
+        phClient = new PhoneHomeClient(null, null, (HttpClientBuilder) null, (Gson) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");

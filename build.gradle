@@ -7,15 +7,12 @@ buildscript {
     dependencies { classpath 'com.blackducksoftware.integration:common-gradle-plugin:0.0.+' }
 }
 
-version = '0.12.1-SNAPSHOT'
+version = '0.13.0-SNAPSHOT'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
-    compile 'org.apache.httpcomponents:httpclient:4.5.5'
-    compile 'org.apache.commons:commons-lang3:3.7'
-    compile 'com.google.code.gson:gson:2.8.4'
-    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'com.blackducksoftware.integration:integration-common:11.3.0-SNAPSHOT'
 
     testCompile 'org.mock-server:mockserver-netty:3.10.4'
 }
