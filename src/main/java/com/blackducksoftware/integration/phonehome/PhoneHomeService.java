@@ -32,23 +32,20 @@ import com.blackducksoftware.integration.log.IntLogger;
 
 public class PhoneHomeService {
     private final IntLogger logger;
-    private final PhoneHomeCallable phoneHomeCallable;
     private final ExecutorService executorService;
 
-    public PhoneHomeService(final IntLogger logger, final PhoneHomeCallable phoneHomeCallable, final ExecutorService executorService) {
+    public PhoneHomeService(final IntLogger logger, final ExecutorService executorService) {
         this.logger = logger;
-        this.phoneHomeCallable = phoneHomeCallable;
         this.executorService = executorService;
     }
 
-    public PhoneHomeService(final IntLogger logger, final PhoneHomeCallable phoneHomeCallable) {
+    public PhoneHomeService(final IntLogger logger) {
         this.logger = logger;
-        this.phoneHomeCallable = phoneHomeCallable;
         final ThreadFactory threadFactory = Executors.defaultThreadFactory();
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
     }
 
-    public PhoneHomeResponse startPhoneHome() {
+    public PhoneHomeResponse startPhoneHome(final PhoneHomeCallable phoneHomeCallable) {
         try {
             final Future<Boolean> resultTask = executorService.submit(phoneHomeCallable);
             return new PhoneHomeResponse(resultTask);
@@ -58,7 +55,7 @@ public class PhoneHomeService {
         return null;
     }
 
-    public Boolean phoneHome() {
+    public Boolean phoneHome(final PhoneHomeCallable phoneHomeCallable) {
         try {
             return phoneHomeCallable.call();
         } catch (final Exception e) {
