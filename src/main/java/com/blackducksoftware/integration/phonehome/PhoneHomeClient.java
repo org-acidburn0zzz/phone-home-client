@@ -44,8 +44,8 @@ import com.google.gson.Gson;
 public class PhoneHomeClient {
     public static final String BLACKDUCK_SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";
     public static final String BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE = "BLACKDUCK_PHONE_HOME_URL_OVERRIDE";
-    public static final String SKIP_PHONE_HOME_VARIABLE = "SKIP_PHONE_HOME";
-    public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "PHONE_HOME_URL_OVERRIDE";
+    public static final String SKIP_PHONE_HOME_VARIABLE = "SYNOPSYS_SKIP_PHONE_HOME";
+    public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "SYNOPSYS_PHONE_HOME_URL_OVERRIDE";
 
     private final String googleAnalyticsTrackingId;
     private final HttpClientBuilder httpClientBuilder;
