@@ -1,5 +1,5 @@
 /**
- * coverity-common
+ * phone-home-client
  *
  * Copyright (C) 2018 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -21,7 +21,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package com.blackducksoftware.integration.phonehome;
 
 import java.net.URL;
