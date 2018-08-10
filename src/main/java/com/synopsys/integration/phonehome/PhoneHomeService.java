@@ -24,9 +24,7 @@
 package com.synopsys.integration.phonehome;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 
 import com.synopsys.integration.log.IntLogger;
 
@@ -38,13 +36,7 @@ public class PhoneHomeService {
         this.logger = logger;
         this.executorService = executorService;
     }
-
-    public PhoneHomeService(final IntLogger logger) {
-        this.logger = logger;
-        final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
-    }
-
+    
     public PhoneHomeResponse startPhoneHome(final PhoneHomeCallable phoneHomeCallable) {
         try {
             final Future<Boolean> resultTask = executorService.submit(phoneHomeCallable);
