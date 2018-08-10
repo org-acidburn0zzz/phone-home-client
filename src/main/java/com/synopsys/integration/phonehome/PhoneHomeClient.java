@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome;
 
 import java.util.Map;
 import java.util.Optional;
@@ -35,11 +35,11 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 import com.google.gson.Gson;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.phonehome.exception.PhoneHomeException;
+import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
+import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 
 public class PhoneHomeClient {
     public static final String BLACKDUCK_SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";

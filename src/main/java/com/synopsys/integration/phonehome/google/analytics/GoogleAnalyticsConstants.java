@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome.google.analytics;
+package com.synopsys.integration.phonehome.google.analytics;
 
 public class GoogleAnalyticsConstants {
     // Google Tracking ID

@@ -21,14 +21,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
-import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.log.IntLogger;
 
 public class PhoneHomeService {
     private final IntLogger logger;

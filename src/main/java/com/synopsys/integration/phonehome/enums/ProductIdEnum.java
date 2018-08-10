@@ -21,29 +21,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome.enums;
 
-import java.util.concurrent.Future;
-
-public class PhoneHomeResponse {
-    private final Future<Boolean> phoneHomeTask;
-
-    public PhoneHomeResponse(final Future<Boolean> phoneHomeTask) {
-        this.phoneHomeTask = phoneHomeTask;
-    }
-
-    public Future<Boolean> getPhoneHomeTask() {
-        return phoneHomeTask;
-    }
-
-    public boolean endPhoneHome() {
-        if (phoneHomeTask != null) {
-            if (!phoneHomeTask.isDone()) {
-                return phoneHomeTask.cancel(true);
-            }
-        }
-
-        return false;
-    }
+public enum ProductIdEnum {
+    CODE_CENTER,
+    COVERITY,
+    HUB,
+    PROTEX;
 
 }

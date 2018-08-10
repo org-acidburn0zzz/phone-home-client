@@ -9,7 +9,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Black Duck Software.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,13 +27,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.blackducksoftware.integration.log.IntBufferedLogger;
-import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
-import com.blackducksoftware.integration.phonehome.exception.PhoneHomeException;
-import com.blackducksoftware.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.google.gson.Gson;
+import com.synopsys.integration.log.IntBufferedLogger;
+import com.synopsys.integration.log.LogLevel;
+import com.synopsys.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.exception.PhoneHomeException;
+import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 
 public class PhoneHomeClientUnitTest {
     private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.empty()).build();

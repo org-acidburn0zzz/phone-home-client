@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome.exception;
+package com.synopsys.integration.phonehome.exception;
 
 public class PhoneHomeException extends Exception {
     private static final long serialVersionUID = 678249589814131943L;

@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -34,7 +34,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.lang3.StringUtils;
 
-import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 
 public class PhoneHomeRequestBody {
     public static final PhoneHomeRequestBody DO_NOT_PHONE_HOME = null;

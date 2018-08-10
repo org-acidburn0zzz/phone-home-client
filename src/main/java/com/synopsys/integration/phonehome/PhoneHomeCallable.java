@@ -21,13 +21,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome;
+package com.synopsys.integration.phonehome;
 
 import java.net.URL;
 import java.util.concurrent.Callable;
 
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.util.IntEnvironmentVariables;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.util.IntEnvironmentVariables;
 
 public abstract class PhoneHomeCallable implements Callable<Boolean> {
     private final IntLogger logger;

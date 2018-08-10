@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.phonehome.google.analytics;
+package com.synopsys.integration.phonehome.google.analytics;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -36,9 +36,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
-import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
-import com.blackducksoftware.integration.phonehome.enums.ProductIdEnum;
 import com.google.gson.Gson;
+import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
+import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 
 public class GoogleAnalyticsRequestHelper {
     private final Gson gson;
@@ -101,7 +101,7 @@ public class GoogleAnalyticsRequestHelper {
     }
 
     private String generateClientId() {
-        String clientId;
+        final String clientId;
         if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
             clientId = customerId;
         } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
