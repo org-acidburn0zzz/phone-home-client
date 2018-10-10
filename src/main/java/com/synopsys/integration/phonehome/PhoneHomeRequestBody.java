@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 
 public class PhoneHomeRequestBody {
+    public static final int MAX_META_DATA_CHARACTERS = 1536;
     public static final PhoneHomeRequestBody DO_NOT_PHONE_HOME = null;
 
     private final String customerId;
@@ -48,13 +49,13 @@ public class PhoneHomeRequestBody {
     private final Map<String, String> metaData;
 
     private PhoneHomeRequestBody(final PhoneHomeRequestBody.Builder builder) {
-        this.customerId = builder.getCustomerId();
-        this.hostName = builder.getHostName();
-        this.artifactId = builder.getArtifactId();
-        this.artifactVersion = builder.getArtifactVersion();
-        this.productId = builder.getProductId();
-        this.productVersion = builder.getProductVersion();
-        this.metaData = Collections.unmodifiableMap(builder.getMetaData());
+        customerId = builder.getCustomerId();
+        hostName = builder.getHostName();
+        artifactId = builder.getArtifactId();
+        artifactVersion = builder.getArtifactVersion();
+        productId = builder.getProductId();
+        productVersion = builder.getProductVersion();
+        metaData = Collections.unmodifiableMap(builder.getMetaData());
     }
 
     public String getCustomerId() {
@@ -82,7 +83,7 @@ public class PhoneHomeRequestBody {
     }
 
     public Map<String, String> getMetaData() {
-        return metaData;
+        return Collections.unmodifiableMap(new HashMap<>(metaData));
     }
 
     public static class Builder {
@@ -97,7 +98,6 @@ public class PhoneHomeRequestBody {
         private final Map<String, String> metaData = new HashMap<>();
 
         // PhoneHomeRequestBody only has a private constructor to force creation through the builder.
-        @SuppressWarnings("synthetic-access")
         public PhoneHomeRequestBody build() throws IllegalStateException {
             validateRequiredParam(customerId, "customerId");
             validateRequiredParam(hostName, "hostName");
@@ -159,11 +159,29 @@ public class PhoneHomeRequestBody {
         }
 
         public Map<String, String> getMetaData() {
-            return metaData;
+            return Collections.unmodifiableMap(new HashMap<>(metaData));
         }
 
-        public void addToMetaData(final String key, final String value) {
-            metaData.put(key, value);
+        /**
+         * metaData map cannot exceed {@value #MAX_META_DATA_CHARACTERS}
+         * @return true if the data was successfully added, false if the new data would make the map exceed it's size limit
+         */
+        public boolean addToMetaData(final String key, final String value) {
+            if (charactersInMetaDataMap(key, value) < MAX_META_DATA_CHARACTERS) {
+                metaData.put(key, value);
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * metaData map cannot exceed {@value #MAX_META_DATA_CHARACTERS}
+         * @return true if the all the data was successfully added,
+         * false if one or more of the entries entries would make the map exceed it's size limit
+         */
+        public boolean addAllToMetaData(final Map<String, String> metadataMap) {
+            return metadataMap.entrySet().stream()
+                           .allMatch(entry -> addToMetaData(entry.getKey(), entry.getValue()));
         }
 
         public String md5Hash(final String string) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -174,8 +192,14 @@ public class PhoneHomeRequestBody {
 
         private void validateRequiredParam(final String param, final String paramName) throws IllegalStateException {
             if (StringUtils.isBlank(param)) {
-                throw new IllegalStateException("Required parameter '" + paramName + "' is not set");
+                throw new IllegalStateException(String.format("Required parameter '%s' is not set", paramName);
             }
+        }
+
+        private int charactersInMetaDataMap(final String key, final String value) {
+            final int mapEntryWrappingCharacters = 6;
+            final String mapAsString = getMetaData().toString();
+            return mapEntryWrappingCharacters + mapAsString.length() + key.length() + value.length();
         }
 
     }
