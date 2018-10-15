@@ -192,7 +192,7 @@ public class PhoneHomeRequestBody {
 
         private void validateRequiredParam(final String param, final String paramName) throws IllegalStateException {
             if (StringUtils.isBlank(param)) {
-                throw new IllegalStateException(String.format("Required parameter '%s' is not set", paramName);
+                throw new IllegalStateException(String.format("Required parameter '%s' is not set", paramName));
             }
         }
 
