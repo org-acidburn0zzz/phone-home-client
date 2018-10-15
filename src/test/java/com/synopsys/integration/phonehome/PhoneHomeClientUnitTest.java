@@ -150,8 +150,10 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
         phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
         phoneHomeRequestBuilder.setProductVersion("productVersion");
-        final Map<String, String> builderMetaData = phoneHomeRequestBuilder.getMetaData();
-        builderMetaData.put("example_meta_data", "data");
+        phoneHomeRequestBuilder.addToMetaData("example_meta_data", "data");
+
+        final Map<String, String> builderMetaData = new HashMap<>();
+        builderMetaData.putAll(phoneHomeRequestBuilder.getMetaData());
 
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
