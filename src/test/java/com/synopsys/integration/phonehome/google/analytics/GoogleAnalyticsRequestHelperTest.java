@@ -21,8 +21,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.log.LogLevel;
@@ -33,7 +33,7 @@ import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 public class GoogleAnalyticsRequestHelperTest {
     private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
 
-    @Before
+    @BeforeEach
     public void init() {
         logger.info("\n");
         logger.info("Test Class: GoogleAnalyticsRequestHelperTest");

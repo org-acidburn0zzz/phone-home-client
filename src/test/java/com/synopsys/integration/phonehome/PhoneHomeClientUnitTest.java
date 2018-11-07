@@ -22,13 +22,11 @@ import java.util.Optional;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.log.IntBufferedLogger;
+import com.synopsys.integration.log.BufferedIntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.phonehome.enums.ProductIdEnum;
@@ -38,21 +36,18 @@ import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConsta
 public class PhoneHomeClientUnitTest {
     private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.empty()).build();
 
-    private Map<String, String> defualtEnvironmentVariables;
+    private Map<String, String> defaultEnvironmentVariables;
     private PhoneHomeClient defaultClient;
 
-    @Before
+    @BeforeEach
     public void init() {
         final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
         logger.info("\n");
         logger.info("Test Class: PhoneHomeClientUnitTest");
-        defualtEnvironmentVariables = new HashMap<>();
-        defualtEnvironmentVariables.put(PhoneHomeClient.PHONE_HOME_URL_OVERRIDE_VARIABLE, GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT);
+        defaultEnvironmentVariables = new HashMap<>();
+        defaultEnvironmentVariables.put(PhoneHomeClient.PHONE_HOME_URL_OVERRIDE_VARIABLE, GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT);
         defaultClient = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger);
     }
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void callHomeIntegrationsTest() throws Exception {
@@ -65,7 +60,7 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        defaultClient.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
+        defaultClient.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
     }
 
     @Test
@@ -79,12 +74,12 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        defaultClient.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
+        defaultClient.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
     }
 
     @Test
     public void callHomeSkip() throws Exception {
-        final IntBufferedLogger logger = new IntBufferedLogger();
+        final BufferedIntLogger logger = new BufferedIntLogger();
         final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger, DEFAULT_REQUEST_CONFIG);
 
         final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
@@ -96,14 +91,14 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        defualtEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");
+        defaultEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");
 
-        clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
+        clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
         assertTrue(logger.getOutputString(LogLevel.DEBUG).contains("Skipping phone home"));
 
-        defualtEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "false");
+        defaultEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "false");
 
-        clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defualtEnvironmentVariables);
+        clientWithTrackableLogger.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
         assertTrue(logger.getOutputString(LogLevel.DEBUG).contains("Phoning home to "));
     }
 
