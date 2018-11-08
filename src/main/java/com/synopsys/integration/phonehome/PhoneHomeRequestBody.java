@@ -163,7 +163,7 @@ public class PhoneHomeRequestBody {
         }
 
         /**
-         * metaData map cannot exceed {@value #MAX_META_DATA_CHARACTERS}
+         * metaData map cannot exceed {@value com.synopsys.integration.phonehome.PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
          * @return true if the data was successfully added, false if the new data would make the map exceed it's size limit
          */
         public boolean addToMetaData(final String key, final String value) {
@@ -175,7 +175,7 @@ public class PhoneHomeRequestBody {
         }
 
         /**
-         * metaData map cannot exceed {@value #MAX_META_DATA_CHARACTERS}
+         * metaData map cannot exceed {@value com.synopsys.integration.phonehome.PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
          * @return true if the all the data was successfully added,
          * false if one or more of the entries entries would make the map exceed it's size limit
          */
