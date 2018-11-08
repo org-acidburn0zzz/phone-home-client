@@ -23,6 +23,9 @@
  */
 package com.synopsys.integration.phonehome;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -30,29 +33,65 @@ import com.synopsys.integration.log.IntLogger;
 
 public class PhoneHomeService {
     private final IntLogger logger;
+    private final PhoneHomeClient phoneHomeClient;
     private final ExecutorService executorService;
 
-    public PhoneHomeService(final IntLogger logger, final ExecutorService executorService) {
-        this.logger = logger;
-        this.executorService = executorService;
-    }
-    
-    public PhoneHomeResponse startPhoneHome(final PhoneHomeCallable phoneHomeCallable) {
-        try {
-            final Future<Boolean> resultTask = executorService.submit(phoneHomeCallable);
-            return new PhoneHomeResponse(resultTask);
-        } catch (final Exception e) {
-            logger.debug("Could not build phone home body" + e.getMessage(), e);
-        }
-        return null;
+    public static PhoneHomeService createPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient) {
+        return new PhoneHomeService(logger, phoneHomeClient, null);
     }
 
-    public Boolean phoneHome(final PhoneHomeCallable phoneHomeCallable) {
-        try {
-            return phoneHomeCallable.call();
-        } catch (final Exception e) {
-            logger.debug("Could not build phone home body" + e.getMessage(), e);
+    public static PhoneHomeService createAsynchronousPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+        return new PhoneHomeService(logger, phoneHomeClient, executorService);
+    }
+
+    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+        this.logger = logger;
+        this.phoneHomeClient = phoneHomeClient;
+        this.executorService = executorService;
+    }
+
+    public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody) {
+        return phoneHome(phoneHomeRequestBody, Collections.emptyMap());
+    }
+
+    public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) {
+        Future<Boolean> phoneHomeTask = null;
+        final PhoneHomeCallable phoneHomeCallable = new PhoneHomeCallable(phoneHomeRequestBody, environmentVariables);
+        if (executorService == null) {
+            final Boolean result = phoneHomeCallable.call();
+            return PhoneHomeResponse.createResponse(result);
+        } else {
+            try {
+                phoneHomeTask = executorService.submit(phoneHomeCallable);
+            } catch (final Exception e) {
+                logger.debug("Problem executing phone home asynchronously: " + e.getMessage(), e);
+            }
         }
-        return false;
+        return PhoneHomeResponse.createAsynchronousResponse(phoneHomeTask);
+    }
+
+    private class PhoneHomeCallable implements Callable<Boolean> {
+        private final PhoneHomeRequestBody phoneHomeRequestBody;
+        private final Map<String, String> environmentVariables;
+
+        public PhoneHomeCallable(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) {
+            this.phoneHomeRequestBody = phoneHomeRequestBody;
+            this.environmentVariables = environmentVariables;
+        }
+
+        @Override
+        public Boolean call() {
+            Boolean result = Boolean.FALSE;
+            try {
+                logger.debug("starting phone home");
+                phoneHomeClient.postPhoneHomeRequest(phoneHomeRequestBody, environmentVariables);
+                result = Boolean.TRUE;
+                logger.debug("completed phone home");
+            } catch (final Exception ex) {
+                logger.debug("Phone home error.", ex);
+            }
+
+            return result;
+        }
     }
 }
