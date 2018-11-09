@@ -83,7 +83,7 @@ public class PhoneHomeRequestBody {
     }
 
     public Map<String, String> getMetaData() {
-        return Collections.unmodifiableMap(new HashMap<>(metaData));
+        return metaData;
     }
 
     public static class Builder {
