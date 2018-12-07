@@ -53,20 +53,6 @@ public class PhoneHomeClientUnitTest {
     }
 
     @Test
-    public void callHomeIntegrationsTestWithHostName() throws Exception {
-        final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
-        phoneHomeRequestBuilder.setCustomerId("customerId");
-        phoneHomeRequestBuilder.setHostName("hostName");
-        phoneHomeRequestBuilder.setArtifactId("artifactId");
-        phoneHomeRequestBuilder.setArtifactVersion("artifactVersion");
-        phoneHomeRequestBuilder.setProductId(ProductIdEnum.CODE_CENTER);
-        phoneHomeRequestBuilder.setProductVersion("productVersion");
-        final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
-
-        defaultClient.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
-    }
-
-    @Test
     public void callHomeSkip() throws Exception {
         final BufferedIntLogger logger = new BufferedIntLogger();
         final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger, DEFAULT_REQUEST_CONFIG);
@@ -150,7 +136,7 @@ public class PhoneHomeClientUnitTest {
     }
 
     @Test
-    public void validateBadPhoneHomeBackend() throws Exception {
+    public void validateBadPhoneHomeBackend() {
         PhoneHomeClient phClient = new PhoneHomeClient(null, null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
