@@ -26,7 +26,7 @@ package com.synopsys.integration.phonehome.enums;
 public enum ProductIdEnum {
     CODE_CENTER,
     COVERITY,
-    HUB,
-    PROTEX;
+    BLACK_DUCK,
+    PROTEX
 
 }
