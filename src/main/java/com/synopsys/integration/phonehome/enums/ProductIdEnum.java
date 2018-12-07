@@ -27,10 +27,6 @@ public enum ProductIdEnum {
     BLACK_DUCK,
     CODE_CENTER,
     COVERITY,
-<<<<<<< HEAD
-    BLACK_DUCK,
-=======
->>>>>>> 298ee3ef1daf23040aa5aa36685c39a1f6560edd
     PROTEX
 
 }
