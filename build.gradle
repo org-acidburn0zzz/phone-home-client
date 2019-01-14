@@ -12,7 +12,7 @@ version = '0.19.3-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
-    implementation 'com.blackducksoftware.integration:integration-common:15.3.0'
+    implementation 'com.blackducksoftware.integration:integration-common:15.3.1'
 
     testImplementation 'org.mock-server:mockserver-netty:3.10.4'
 }
