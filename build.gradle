@@ -10,7 +10,7 @@ buildscript {
 project.ext.moduleName = 'com.synopsys.integration.phone-home-client'
 project.ext.javaUseAutoModuleName = 'true'
 
-version = '0.21.0'
+version = '0.21.1-SNAPSHOT'
 description = 'A library to consolidate phoning home to track usage and other analytics.'
 
 apply plugin: 'com.blackducksoftware.integration.library'
