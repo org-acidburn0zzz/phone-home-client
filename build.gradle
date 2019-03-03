@@ -11,6 +11,7 @@ project.ext.moduleName = 'com.synopsys.integration.phone-home-client'
 project.ext.javaUseAutoModuleName = 'true'
 
 version = '0.21.0'
+description = 'A library to consolidate phoning home to track usage and other analytics.'
 
 apply plugin: 'com.blackducksoftware.integration.library'
 
