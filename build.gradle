@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         maven { url 'https://plugins.gradle.org/m2/' }
     }
@@ -16,7 +15,7 @@ description = 'A library to consolidate phoning home to track usage and other an
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
-    api 'com.blackducksoftware.integration:integration-common:17.1.0'
+    api 'com.blackducksoftware.integration:integration-common:17.2.0'
 
     testImplementation 'org.mock-server:mockserver-netty:3.10.4'
 }
