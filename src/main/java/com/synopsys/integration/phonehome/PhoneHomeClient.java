@@ -23,7 +23,6 @@
 package com.synopsys.integration.phonehome;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +36,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.phonehome.exception.PhoneHomeException;
-import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
 
 public class PhoneHomeClient {
@@ -51,14 +49,12 @@ public class PhoneHomeClient {
     private final IntLogger logger;
     private final Gson gson;
 
-    private String phoneHomeBackendUrl;
-
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger) {
-        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10, Optional.empty()).build());
+        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10).build());
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final Gson gson) {
-        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10, Optional.empty()).build(), gson);
+        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10).build(), gson);
     }
 
     public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final RequestConfig httpRequestConfig) {
@@ -78,8 +74,21 @@ public class PhoneHomeClient {
         this.httpClientBuilder = httpClientBuilder;
         this.logger = logger;
         this.gson = gson;
+    }
 
-        this.phoneHomeBackendUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
+    public static RequestConfig.Builder createInitialRequestConfigBuilder(final int timeoutSeconds) {
+        final int timeoutInMillis = timeoutSeconds * 1000;
+        final RequestConfig.Builder builder = RequestConfig.custom();
+        builder.setConnectionRequestTimeout(timeoutInMillis);
+        builder.setConnectTimeout(timeoutInMillis);
+        builder.setSocketTimeout(timeoutInMillis);
+        return builder;
+    }
+
+    public static RequestConfig.Builder createInitialRequestConfigBuilder(final int timeoutSeconds, final HttpHost proxyHost) {
+        final RequestConfig.Builder builder = createInitialRequestConfigBuilder(timeoutSeconds);
+        builder.setProxy(proxyHost);
+        return builder;
     }
 
     public void postPhoneHomeRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) throws PhoneHomeException {
@@ -90,30 +99,25 @@ public class PhoneHomeClient {
         if (phoneHomeRequestBody == null) {
             throw new PhoneHomeException("The request body must not be null.");
         }
-        checkOverridePhoneHomeUrl(environmentVariables);
-        logger.debug("Phoning home to " + phoneHomeBackendUrl);
+        String overrideUrl = checkOverridePhoneHomeUrl(environmentVariables);
 
         try (final CloseableHttpClient client = httpClientBuilder.build()) {
             final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson, googleAnalyticsTrackingId, phoneHomeRequestBody);
-            final HttpUriRequest request = requestHelper.createRequest(phoneHomeBackendUrl);
+            final HttpUriRequest request;
 
+            if (overrideUrl != null) {
+                logger.debug("Overriding Phone-Home URL: " + overrideUrl);
+                request = requestHelper.createRequest(overrideUrl);
+            } else {
+                request = requestHelper.createRequest();
+            }
+
+            logger.debug("Phoning home to " + request.getURI());
             final HttpResponse response = client.execute(request);
             logger.trace("Response Code: " + response.getStatusLine().getStatusCode());
         } catch (final Exception e) {
             throw new PhoneHomeException(e.getMessage(), e);
         }
-    }
-
-    public static RequestConfig.Builder createInitialRequestConfigBuilder(final int timeoutSeconds, final Optional<HttpHost> proxyHost) {
-        final int timeoutInMillis = timeoutSeconds * 1000;
-        final RequestConfig.Builder builder = RequestConfig.custom();
-        builder.setConnectionRequestTimeout(timeoutInMillis);
-        builder.setConnectTimeout(timeoutInMillis);
-        builder.setSocketTimeout(timeoutInMillis);
-        if (proxyHost.isPresent()) {
-            builder.setProxy(proxyHost.get());
-        }
-        return builder;
     }
 
     private boolean skipPhoneHome(final Map<String, String> environmentVariables) {
@@ -127,17 +131,15 @@ public class PhoneHomeClient {
         return false;
     }
 
-    private void checkOverridePhoneHomeUrl(final Map<String, String> environmentVariables) {
-        if (environmentVariables.containsKey(PHONE_HOME_URL_OVERRIDE_VARIABLE) || environmentVariables.containsKey(BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE)) {
-            String overrideUrl = environmentVariables.get(PHONE_HOME_URL_OVERRIDE_VARIABLE);
-            if (StringUtils.isBlank(overrideUrl)) {
-                overrideUrl = environmentVariables.get(BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE);
-            }
-            if (StringUtils.isNotBlank(overrideUrl)) {
-                phoneHomeBackendUrl = overrideUrl;
-                logger.debug("Overriding Phone-Home URL: " + overrideUrl);
-            }
+    private String checkOverridePhoneHomeUrl(final Map<String, String> environmentVariables) {
+        String overrideUrl;
+
+        overrideUrl = environmentVariables.get(PHONE_HOME_URL_OVERRIDE_VARIABLE);
+        if (StringUtils.isBlank(overrideUrl)) {
+            overrideUrl = environmentVariables.get(BLACKDUCK_PHONE_HOME_URL_OVERRIDE_VARIABLE);
         }
+
+        return overrideUrl;
     }
 
 }

@@ -48,12 +48,17 @@ public class GoogleAnalyticsRequestHelperTest {
         final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
 
         final HttpPost request = helper.createRequest(debugUrl);
+        final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
+
+        String nextRequestLine;
+        while ((nextRequestLine = requestReader.readLine()) != null) {
+            logger.info(nextRequestLine);
+        }
 
         final HttpClient client = HttpClientBuilder.create().build();
 
-        int responseCode = -1;
         final HttpResponse response = client.execute(request);
-        responseCode = response.getStatusLine().getStatusCode();
+        int responseCode = response.getStatusLine().getStatusCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;
