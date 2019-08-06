@@ -44,33 +44,31 @@ public class PhoneHomeClient {
     public static final String SKIP_PHONE_HOME_VARIABLE = "SYNOPSYS_SKIP_PHONE_HOME";
     public static final String PHONE_HOME_URL_OVERRIDE_VARIABLE = "SYNOPSYS_PHONE_HOME_URL_OVERRIDE";
 
-    private final String googleAnalyticsTrackingId;
     private final HttpClientBuilder httpClientBuilder;
     private final IntLogger logger;
     private final Gson gson;
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger) {
-        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10).build());
+    public PhoneHomeClient(final IntLogger logger) {
+        this(logger, createInitialRequestConfigBuilder(10).build());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final Gson gson) {
-        this(googleAnalyticsTrackingId, logger, createInitialRequestConfigBuilder(10).build(), gson);
+    public PhoneHomeClient(final IntLogger logger, final Gson gson) {
+        this(logger, createInitialRequestConfigBuilder(10).build(), gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final RequestConfig httpRequestConfig) {
-        this(googleAnalyticsTrackingId, logger, httpRequestConfig, new Gson());
+    public PhoneHomeClient(final IntLogger logger, final RequestConfig httpRequestConfig) {
+        this(logger, httpRequestConfig, new Gson());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final RequestConfig httpRequestConfig, final Gson gson) {
-        this(googleAnalyticsTrackingId, logger, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig), gson);
+    public PhoneHomeClient(final IntLogger logger, final RequestConfig httpRequestConfig, final Gson gson) {
+        this(logger, HttpClientBuilder.create().setDefaultRequestConfig(httpRequestConfig), gson);
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final HttpClientBuilder httpClientBuilder) {
-        this(googleAnalyticsTrackingId, logger, httpClientBuilder, new Gson());
+    public PhoneHomeClient(final IntLogger logger, final HttpClientBuilder httpClientBuilder) {
+        this(logger, httpClientBuilder, new Gson());
     }
 
-    public PhoneHomeClient(final String googleAnalyticsTrackingId, final IntLogger logger, final HttpClientBuilder httpClientBuilder, final Gson gson) {
-        this.googleAnalyticsTrackingId = googleAnalyticsTrackingId;
+    public PhoneHomeClient(final IntLogger logger, final HttpClientBuilder httpClientBuilder, final Gson gson) {
         this.httpClientBuilder = httpClientBuilder;
         this.logger = logger;
         this.gson = gson;
@@ -102,14 +100,14 @@ public class PhoneHomeClient {
         String overrideUrl = checkOverridePhoneHomeUrl(environmentVariables);
 
         try (final CloseableHttpClient client = httpClientBuilder.build()) {
-            final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson, googleAnalyticsTrackingId, phoneHomeRequestBody);
+            final GoogleAnalyticsRequestHelper requestHelper = new GoogleAnalyticsRequestHelper(gson);
             final HttpUriRequest request;
 
             if (overrideUrl != null) {
                 logger.debug("Overriding Phone-Home URL: " + overrideUrl);
-                request = requestHelper.createRequest(overrideUrl);
+                request = requestHelper.createRequest(phoneHomeRequestBody, overrideUrl);
             } else {
-                request = requestHelper.createRequest();
+                request = requestHelper.createRequest(phoneHomeRequestBody);
             }
 
             logger.debug("Phoning home to " + request.getURI());
