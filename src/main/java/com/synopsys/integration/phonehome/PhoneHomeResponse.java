@@ -31,17 +31,17 @@ public class PhoneHomeResponse {
     private final Future<Boolean> phoneHomeTask;
     private final Boolean result;
 
+    private PhoneHomeResponse(final Future<Boolean> phoneHomeTask, final Boolean result) {
+        this.phoneHomeTask = phoneHomeTask;
+        this.result = result;
+    }
+
     public static PhoneHomeResponse createResponse(final Boolean result) {
         return new PhoneHomeResponse(null, result);
     }
 
     public static PhoneHomeResponse createAsynchronousResponse(final Future<Boolean> phoneHomeTask) {
         return new PhoneHomeResponse(phoneHomeTask, Boolean.FALSE);
-    }
-
-    private PhoneHomeResponse(final Future<Boolean> phoneHomeTask, final Boolean result) {
-        this.phoneHomeTask = phoneHomeTask;
-        this.result = result;
     }
 
     /**
@@ -59,7 +59,10 @@ public class PhoneHomeResponse {
         if (phoneHomeTask != null) {
             try {
                 return phoneHomeTask.get(timeoutInSeconds, TimeUnit.SECONDS);
-            } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            } catch (final ExecutionException | TimeoutException e) {
+                return Boolean.FALSE;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
                 return Boolean.FALSE;
             } finally {
                 endPhoneHome();

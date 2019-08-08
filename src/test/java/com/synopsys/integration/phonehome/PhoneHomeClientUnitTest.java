@@ -1,12 +1,12 @@
 package com.synopsys.integration.phonehome;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -23,7 +23,7 @@ import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 
 public class PhoneHomeClientUnitTest {
-    private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.empty()).build();
+    private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5).build();
 
     private Map<String, String> defaultEnvironmentVariables;
     private PhoneHomeClient defaultClient;
@@ -35,7 +35,7 @@ public class PhoneHomeClientUnitTest {
         logger.info("Test Class: PhoneHomeClientUnitTest");
         defaultEnvironmentVariables = new HashMap<>();
         defaultEnvironmentVariables.put(PhoneHomeClient.PHONE_HOME_URL_OVERRIDE_VARIABLE, GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT);
-        defaultClient = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger);
+        defaultClient = new PhoneHomeClient(logger);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PhoneHomeClientUnitTest {
     @Test
     public void callHomeSkip() throws Exception {
         final BufferedIntLogger logger = new BufferedIntLogger();
-        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, logger, DEFAULT_REQUEST_CONFIG);
+        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(logger, DEFAULT_REQUEST_CONFIG);
 
         final PhoneHomeRequestBody.Builder phoneHomeRequestBuilder = new PhoneHomeRequestBody.Builder();
         phoneHomeRequestBuilder.setCustomerId("customerId");
@@ -122,22 +122,21 @@ public class PhoneHomeClientUnitTest {
         phoneHomeRequestBuilder.setProductVersion("productVersion");
         phoneHomeRequestBuilder.addToMetaData("example_meta_data", "data");
 
-        final Map<String, String> builderMetaData = new HashMap<>();
-        builderMetaData.putAll(phoneHomeRequestBuilder.getMetaData());
+        final Map<String, String> builderMetaData = new HashMap<>(phoneHomeRequestBuilder.getMetaData());
 
         final PhoneHomeRequestBody phoneHomeRequest = phoneHomeRequestBuilder.build();
 
-        assertTrue(phoneHomeRequestBuilder.getCustomerId().equals(phoneHomeRequest.getCustomerId()));
-        assertTrue(phoneHomeRequestBuilder.getArtifactId().equals(phoneHomeRequest.getArtifactId()));
-        assertTrue(phoneHomeRequestBuilder.getArtifactVersion().equals(phoneHomeRequest.getArtifactVersion()));
-        assertTrue(phoneHomeRequestBuilder.getProductId().equals(phoneHomeRequest.getProductId()));
-        assertTrue(phoneHomeRequestBuilder.getProductVersion().equals(phoneHomeRequest.getProductVersion()));
-        assertTrue(builderMetaData.equals((phoneHomeRequest.getMetaData())));
+        assertEquals(phoneHomeRequestBuilder.getCustomerId(), phoneHomeRequest.getCustomerId());
+        assertEquals(phoneHomeRequestBuilder.getArtifactId(), phoneHomeRequest.getArtifactId());
+        assertEquals(phoneHomeRequestBuilder.getArtifactVersion(), phoneHomeRequest.getArtifactVersion());
+        assertEquals(phoneHomeRequestBuilder.getProductId(), phoneHomeRequest.getProductId());
+        assertEquals(phoneHomeRequestBuilder.getProductVersion(), phoneHomeRequest.getProductVersion());
+        assertEquals(builderMetaData, phoneHomeRequest.getMetaData());
     }
 
     @Test
     public void validateBadPhoneHomeBackend() {
-        PhoneHomeClient phClient = new PhoneHomeClient(null, null);
+        PhoneHomeClient phClient = new PhoneHomeClient(null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -145,7 +144,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, null, (RequestConfig) null);
+        phClient = new PhoneHomeClient(null, (RequestConfig) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -153,7 +152,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, null, (HttpClientBuilder) null);
+        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -161,7 +160,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, null, (RequestConfig) null, (Gson) null);
+        phClient = new PhoneHomeClient(null, (RequestConfig) null, (Gson) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -169,7 +168,7 @@ public class PhoneHomeClientUnitTest {
             // Do nothing
         }
 
-        phClient = new PhoneHomeClient(null, null, (HttpClientBuilder) null, (Gson) null);
+        phClient = new PhoneHomeClient(null, (HttpClientBuilder) null, (Gson) null);
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
@@ -181,7 +180,7 @@ public class PhoneHomeClientUnitTest {
     @Test
     public void createInitialRequestConfigBuilderWithProxyHostTest() {
         final HttpHost proxyHost = new HttpHost("localhost:8081");
-        PhoneHomeClient.createInitialRequestConfigBuilder(5, Optional.of(proxyHost));
+        PhoneHomeClient.createInitialRequestConfigBuilder(5, proxyHost);
     }
 
 }

@@ -24,93 +24,83 @@ package com.synopsys.integration.phonehome.google.analytics;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 
 public class GoogleAnalyticsRequestHelper {
     private final Gson gson;
-    private final String trackingId;
 
-    private final String customerId;
-    private final String hostName;
-    private final String artifactId;
-    private final String artifactVersion;
-    private final ProductIdEnum productId;
-    private final String productVersion;
-    private final Map<String, String> metaData;
-
-    public GoogleAnalyticsRequestHelper(final Gson gson, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+    public GoogleAnalyticsRequestHelper(final Gson gson) {
         this.gson = gson;
-        this.trackingId = trackingId;
-
-        this.customerId = phoneHomeRequestBody.getCustomerId();
-        this.hostName = phoneHomeRequestBody.getHostName();
-        this.artifactId = phoneHomeRequestBody.getArtifactId();
-        this.artifactVersion = phoneHomeRequestBody.getArtifactVersion();
-        this.productId = phoneHomeRequestBody.getProductId();
-        this.productVersion = phoneHomeRequestBody.getProductVersion();
-        this.metaData = phoneHomeRequestBody.getMetaData();
     }
 
-    public HttpPost createRequest(final String url) throws UnsupportedEncodingException {
+    public HttpPost createRequest(final PhoneHomeRequestBody phoneHomeRequestBody) throws UnsupportedEncodingException {
+        return createRequest(phoneHomeRequestBody, null, GoogleAnalyticsConstants.PRODUCTION_INTEGRATIONS_TRACKING_ID);
+    }
+
+    public HttpPost createRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final String url) throws UnsupportedEncodingException {
+        return createRequest(phoneHomeRequestBody, url, GoogleAnalyticsConstants.PRODUCTION_INTEGRATIONS_TRACKING_ID);
+    }
+
+    public HttpPost createRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final String url, final String trackingId) throws UnsupportedEncodingException {
+        final GoogleAnalyticsRequestTransformer transformer = new GoogleAnalyticsRequestTransformer(gson, trackingId, phoneHomeRequestBody);
+        final List<NameValuePair> parameters = transformer.getParameters();
+        final AbstractHttpEntity entity;
+        String requestUrl = url;
+
+        // Not in the transformer because this will likely go away -- rotte 8/6/2019
+        final List<String> artifactModules = phoneHomeRequestBody.getArtifactModules();
+
+        if (artifactModules == null || artifactModules.size() == 0) {
+            if (StringUtils.isBlank(requestUrl)) {
+                requestUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.COLLECT_ENDPOINT;
+            }
+
+            entity = new UrlEncodedFormEntity(parameters);
+        } else {
+            final String requestString = artifactModules.stream()
+                                             .map(module -> createModuleParameters(parameters, module))
+                                             .map(moduleParameters -> URLEncodedUtils.format(moduleParameters, HTTP.DEF_CONTENT_CHARSET.name()))
+                                             .collect(Collectors.joining("\n"));
+
+            if (StringUtils.isBlank(requestUrl)) {
+                requestUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.BATCH_ENDPOINT;
+            }
+
+            entity = new StringEntity(requestString, HTTP.DEF_CONTENT_CHARSET);
+        }
+
+        return this.createRequest(requestUrl, entity);
+
+    }
+
+    public HttpPost createRequest(final String url, final HttpEntity httpEntity) {
         final HttpPost post = new HttpPost(url);
 
-        final List<NameValuePair> parameters = new ArrayList<>();
-        for (final Entry<String, String> entry : getPayloadDataMap().entrySet()) {
-            final NameValuePair nameValuePair = new BasicNameValuePair(entry.getKey(), entry.getValue());
-            parameters.add(nameValuePair);
-        }
-        post.setEntity(new UrlEncodedFormEntity(parameters));
+        post.setEntity(httpEntity);
         // TODO post.addHeader(HttpHeaders.ACCEPT, ContentType.TEXT_PLAIN.getMimeType());
 
         return post;
     }
 
-    private Map<String, String> getPayloadDataMap() {
-        final Map<String, String> payloadData = new HashMap<>();
-
-        payloadData.put(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
-        payloadData.put(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-        payloadData.put(GoogleAnalyticsConstants.CLIENT_ID_KEY, generateClientId());
-        payloadData.put(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
-        payloadData.put(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
-
-        // Phone Home Parameters
-        payloadData.put(GoogleAnalyticsConstants.CUSTOMER_ID, customerId);
-        payloadData.put(GoogleAnalyticsConstants.HOST_NAME, hostName);
-        payloadData.put(GoogleAnalyticsConstants.ARTIFACT_ID, artifactId);
-        payloadData.put(GoogleAnalyticsConstants.ARTIFACT_VERSION, artifactVersion);
-        payloadData.put(GoogleAnalyticsConstants.PRODUCT_ID, productId.name());
-        payloadData.put(GoogleAnalyticsConstants.PRODUCT_VERSION, productVersion);
-        payloadData.put(GoogleAnalyticsConstants.META_DATA, gson.toJson(metaData));
-
-        return payloadData;
+    private List<NameValuePair> createModuleParameters(final List<NameValuePair> parameters, final String module) {
+        final NameValuePair parameter = new BasicNameValuePair(GoogleAnalyticsConstants.MODULE_ID, module);
+        final List<NameValuePair> newParameters = new ArrayList<>(parameters);
+        newParameters.add(parameter);
+        return newParameters;
     }
-
-    private String generateClientId() {
-        final String clientId;
-        if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
-            clientId = customerId;
-        } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
-            clientId = hostName;
-        } else {
-            clientId = PhoneHomeRequestBody.Builder.UNKNOWN_ID;
-        }
-
-        final byte[] bytesFromString = clientId.getBytes();
-        return UUID.nameUUIDFromBytes(bytesFromString).toString();
-    }
-
 }

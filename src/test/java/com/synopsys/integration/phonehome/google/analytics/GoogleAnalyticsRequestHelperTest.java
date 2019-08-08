@@ -45,15 +45,63 @@ public class GoogleAnalyticsRequestHelperTest {
         bodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
         bodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson(), GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID, bodyBuilder.build());
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
 
-        final HttpPost request = helper.createRequest(debugUrl);
+        final HttpPost request = helper.createRequest(bodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
+
+        String nextRequestLine;
+        while ((nextRequestLine = requestReader.readLine()) != null) {
+            logger.info(nextRequestLine);
+        }
 
         final HttpClient client = HttpClientBuilder.create().build();
 
-        int responseCode = -1;
         final HttpResponse response = client.execute(request);
-        responseCode = response.getStatusLine().getStatusCode();
+        int responseCode = response.getStatusLine().getStatusCode();
+        logger.info("Response Code: " + responseCode);
+
+        String nextLine;
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+        logger.info("Response String:");
+        while ((nextLine = reader.readLine()) != null) {
+            logger.info(nextLine);
+        }
+
+        assertEquals(200, responseCode);
+    }
+
+    @Test
+    public void batchRequestTest() throws IOException {
+        final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
+
+        final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
+        bodyBuilder.setCustomerId("fake_customer_id");
+        bodyBuilder.setHostName("fake_host_name");
+        bodyBuilder.setArtifactId("fake_artifact_id");
+        bodyBuilder.setArtifactVersion("fake_artifact_version");
+        bodyBuilder.setProductId(ProductIdEnum.CODE_CENTER);
+        bodyBuilder.setProductVersion("fake_product_version");
+        bodyBuilder.setArtifactModules("fake_module_1", "fake_module_2", "fake_module_3");
+
+        bodyBuilder.addToMetaData("exampleMetaData_1", "data");
+        bodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+
+        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
+
+        final HttpPost request = helper.createRequest(bodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
+
+        String nextRequestLine;
+        while ((nextRequestLine = requestReader.readLine()) != null) {
+            logger.info(nextRequestLine);
+        }
+
+        final HttpClient client = HttpClientBuilder.create().build();
+
+        final HttpResponse response = client.execute(request);
+        int responseCode = response.getStatusLine().getStatusCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;

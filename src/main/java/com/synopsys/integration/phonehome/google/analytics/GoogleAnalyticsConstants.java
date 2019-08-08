@@ -30,6 +30,7 @@ public class GoogleAnalyticsConstants {
     // Api Path(s)
     public static final String BASE_URL = "https://www.google-analytics.com";
     public static final String COLLECT_ENDPOINT = "/collect";
+    public static final String BATCH_ENDPOINT = "/batch";
     public static final String DEBUG_ENDPOINT = "/debug" + COLLECT_ENDPOINT;
 
     // Payload Data - Required
@@ -48,5 +49,6 @@ public class GoogleAnalyticsConstants {
     public static final String PRODUCT_VERSION = "cd5";
     public static final String META_DATA = "cd6";
     public static final String HOST_NAME = "cd7";
+    public static final String MODULE_ID = "cd8";
 
 }

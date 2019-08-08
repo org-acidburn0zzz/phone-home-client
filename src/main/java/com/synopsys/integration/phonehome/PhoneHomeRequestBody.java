@@ -25,8 +25,10 @@ package com.synopsys.integration.phonehome;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -45,6 +47,7 @@ public class PhoneHomeRequestBody {
     private final String artifactVersion;
     private final ProductIdEnum productId;
     private final String productVersion;
+    private final List<String> artifactModules;
     private final Map<String, String> metaData;
 
     private PhoneHomeRequestBody(final PhoneHomeRequestBody.Builder builder) {
@@ -54,6 +57,7 @@ public class PhoneHomeRequestBody {
         artifactVersion = builder.getArtifactVersion();
         productId = builder.getProductId();
         productVersion = builder.getProductVersion();
+        artifactModules = builder.getArtifactModules();
         metaData = Collections.unmodifiableMap(builder.getMetaData());
     }
 
@@ -85,16 +89,20 @@ public class PhoneHomeRequestBody {
         return metaData;
     }
 
+    public List<String> getArtifactModules() {
+        return artifactModules;
+    }
+
     public static class Builder {
         public static final String UNKNOWN_ID = "<unknown>";
-
+        private final Map<String, String> metaData = new HashMap<>();
         private String customerId;
         private String hostName;
         private String artifactId;
         private String artifactVersion;
         private ProductIdEnum productId;
         private String productVersion;
-        private final Map<String, String> metaData = new HashMap<>();
+        private List<String> artifactModules;
 
         // PhoneHomeRequestBody only has a private constructor to force creation through the builder.
         public PhoneHomeRequestBody build() throws IllegalStateException {
@@ -157,6 +165,14 @@ public class PhoneHomeRequestBody {
             this.productVersion = productVersion;
         }
 
+        public List<String> getArtifactModules() {
+            return artifactModules;
+        }
+
+        public void setArtifactModules(final String... artifactModules) {
+            this.artifactModules = Arrays.asList(artifactModules);
+        }
+
         public Map<String, String> getMetaData() {
             return Collections.unmodifiableMap(new HashMap<>(metaData));
         }
@@ -180,7 +196,7 @@ public class PhoneHomeRequestBody {
          */
         public boolean addAllToMetaData(final Map<String, String> metadataMap) {
             return metadataMap.entrySet().stream()
-                           .allMatch(entry -> addToMetaData(entry.getKey(), entry.getValue()));
+                       .allMatch(entry -> addToMetaData(entry.getKey(), entry.getValue()));
         }
 
         public String md5Hash(final String string) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -200,7 +216,6 @@ public class PhoneHomeRequestBody {
             final String mapAsString = getMetaData().toString();
             return mapEntryWrappingCharacters + mapAsString.length() + key.length() + value.length();
         }
-
     }
 
 }
