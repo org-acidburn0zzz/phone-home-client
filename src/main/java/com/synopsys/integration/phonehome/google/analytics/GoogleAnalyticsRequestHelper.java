@@ -99,10 +99,11 @@ public class GoogleAnalyticsRequestHelper {
         return post;
     }
 
-    private List<NameValuePair> addModuleMetadata(List<NameValuePair> parameters, String module) {
+    private List<NameValuePair> addModuleMetadata(final List<NameValuePair> parameters, final String module) {
         final NameValuePair parameter = new BasicNameValuePair(GoogleAnalyticsConstants.MODULE_ID, module);
-        parameters.add(parameter);
-        return parameters;
+        final List<NameValuePair> newParameters = new ArrayList<>(parameters);
+        newParameters.add(parameter);
+        return newParameters;
     }
 
     private class RequestTransformer {
