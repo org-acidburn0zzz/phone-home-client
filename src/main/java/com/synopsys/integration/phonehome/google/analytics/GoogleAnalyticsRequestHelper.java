@@ -25,8 +25,6 @@ package com.synopsys.integration.phonehome.google.analytics;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +57,7 @@ public class GoogleAnalyticsRequestHelper {
     }
 
     public HttpPost createRequest(final PhoneHomeRequestBody phoneHomeRequestBody, final String url, final String trackingId) throws UnsupportedEncodingException {
-        final RequestTransformer transformer = new RequestTransformer(trackingId, phoneHomeRequestBody);
+        final GoogleAnalyticsRequestTransformer transformer = new GoogleAnalyticsRequestTransformer(gson, trackingId, phoneHomeRequestBody);
         final List<NameValuePair> parameters = transformer.getParameters();
         final AbstractHttpEntity entity;
         String requestUrl = url;
@@ -75,7 +73,7 @@ public class GoogleAnalyticsRequestHelper {
             entity = new UrlEncodedFormEntity(parameters);
         } else {
             final String requestString = artifactModules.stream()
-                                             .map(module -> addModuleMetadata(parameters, module))
+                                             .map(module -> createModuleParameters(parameters, module))
                                              .map(moduleParameters -> URLEncodedUtils.format(moduleParameters, HTTP.DEF_CONTENT_CHARSET.name()))
                                              .collect(Collectors.joining("\n"));
 
@@ -99,62 +97,10 @@ public class GoogleAnalyticsRequestHelper {
         return post;
     }
 
-    private List<NameValuePair> addModuleMetadata(final List<NameValuePair> parameters, final String module) {
+    private List<NameValuePair> createModuleParameters(final List<NameValuePair> parameters, final String module) {
         final NameValuePair parameter = new BasicNameValuePair(GoogleAnalyticsConstants.MODULE_ID, module);
         final List<NameValuePair> newParameters = new ArrayList<>(parameters);
         newParameters.add(parameter);
         return newParameters;
-    }
-
-    private class RequestTransformer {
-        final List<NameValuePair> parameters = new ArrayList<>();
-        final PhoneHomeRequestBody phoneHomeRequestBody;
-        final String trackingId;
-        private Consumer<NameValuePair> adder = parameters::add;
-
-        public RequestTransformer(final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
-            this.phoneHomeRequestBody = phoneHomeRequestBody;
-            this.trackingId = trackingId;
-        }
-
-        public List<NameValuePair> getParameters() {
-            addParameter(GoogleAnalyticsConstants.API_VERSION_KEY, "1");
-            addParameter(GoogleAnalyticsConstants.HIT_TYPE_KEY, "pageview");
-
-            String clientId = generateClientId(phoneHomeRequestBody.getCustomerId(), phoneHomeRequestBody.getHostName());
-            addParameter(GoogleAnalyticsConstants.CLIENT_ID_KEY, clientId);
-            addParameter(GoogleAnalyticsConstants.TRACKING_ID_KEY, trackingId);
-            addParameter(GoogleAnalyticsConstants.DOCUMENT_PATH_KEY, "phone-home");
-
-            // Phone Home Parameters
-            addParameter(GoogleAnalyticsConstants.CUSTOMER_ID, phoneHomeRequestBody.getCustomerId());
-            addParameter(GoogleAnalyticsConstants.HOST_NAME, phoneHomeRequestBody.getHostName());
-            addParameter(GoogleAnalyticsConstants.ARTIFACT_ID, phoneHomeRequestBody.getArtifactId());
-            addParameter(GoogleAnalyticsConstants.ARTIFACT_VERSION, phoneHomeRequestBody.getArtifactVersion());
-            addParameter(GoogleAnalyticsConstants.PRODUCT_ID, phoneHomeRequestBody.getProductId().name());
-            addParameter(GoogleAnalyticsConstants.PRODUCT_VERSION, phoneHomeRequestBody.getProductVersion());
-            addParameter(GoogleAnalyticsConstants.META_DATA, gson.toJson(phoneHomeRequestBody.getMetaData()));
-
-            return parameters;
-        }
-
-        private void addParameter(final String key, final String value) {
-            final NameValuePair parameter = new BasicNameValuePair(key, value);
-            adder.accept(parameter);
-        }
-
-        private String generateClientId(final String customerId, final String hostName) {
-            final String clientId;
-            if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
-                clientId = customerId;
-            } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
-                clientId = hostName;
-            } else {
-                clientId = PhoneHomeRequestBody.Builder.UNKNOWN_ID;
-            }
-
-            final byte[] bytesFromString = clientId.getBytes();
-            return UUID.nameUUIDFromBytes(bytesFromString).toString();
-        }
     }
 }
