@@ -61,8 +61,9 @@ public class PhoneHomeResponse {
                 return phoneHomeTask.get(timeoutInSeconds, TimeUnit.SECONDS);
             } catch (final ExecutionException | TimeoutException e) {
                 return Boolean.FALSE;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
+                return Boolean.FALSE;
             } finally {
                 endPhoneHome();
             }
