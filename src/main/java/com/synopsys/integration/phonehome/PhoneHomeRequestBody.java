@@ -173,6 +173,10 @@ public class PhoneHomeRequestBody {
             this.artifactModules = Arrays.asList(artifactModules);
         }
 
+        public void setArtifactModules(final List<String> artifactModules) {
+            this.artifactModules = artifactModules;
+        }
+
         public Map<String, String> getMetaData() {
             return Collections.unmodifiableMap(new HashMap<>(metaData));
         }
