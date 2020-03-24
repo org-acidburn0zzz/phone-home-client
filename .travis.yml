@@ -17,10 +17,13 @@ jdk:
 notifications:
   email:
     recipients:
-    - starlabs@blackducksoftware.com
+    - starlabs@synopsys.com
 
 script:
 - "./gradlew clean build jacocoTestReport coveralls sonarqube"
+
+env:
+- DETECT_GRADLE_INCLUDED_CONFIGURATIONS=compile
 
 after_success:
 - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)

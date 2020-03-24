@@ -12,7 +12,7 @@ description = 'A library to consolidate phoning home to track usage and other an
 apply plugin: 'com.synopsys.integration.library'
 
 dependencies {
-    api 'com.synopsys.integration:integration-common:20.0.4'
+    api 'com.synopsys.integration:integration-common:20.1.1'
 
     testImplementation 'org.mock-server:mockserver-netty:3.10.4'
 }
