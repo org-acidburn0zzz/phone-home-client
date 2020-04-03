@@ -26,6 +26,7 @@ public enum ProductIdEnum {
     BLACK_DUCK,
     CODE_CENTER,
     COVERITY,
+    POLARIS,
     PROTEX
 
 }
