@@ -20,7 +20,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.phonehome;
+package com.synopsys.integration.phonehome.request;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -59,6 +59,18 @@ public class PhoneHomeRequestBody {
         productVersion = builder.getProductVersion();
         artifactModules = builder.getArtifactModules();
         metaData = Collections.unmodifiableMap(builder.getMetaData());
+    }
+
+    public static BlackDuckPhoneHomeRequestBuilder forBlackDuck() {
+        return new BlackDuckPhoneHomeRequestBuilder(new Builder());
+    }
+
+    public static CoverityPhoneHomeRequestBuilder forCoverity() {
+        return new CoverityPhoneHomeRequestBuilder(new Builder());
+    }
+
+    public static PolarisPhoneHomeRequestBuilder forPolaris() {
+        return new PolarisPhoneHomeRequestBuilder(new Builder());
     }
 
     public String getCustomerId() {
@@ -182,7 +194,7 @@ public class PhoneHomeRequestBody {
         }
 
         /**
-         * metaData map cannot exceed {@value com.synopsys.integration.phonehome.PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
+         * metaData map cannot exceed {@value PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
          * @return true if the data was successfully added, false if the new data would make the map exceed it's size limit
          */
         public boolean addToMetaData(final String key, final String value) {
@@ -194,7 +206,7 @@ public class PhoneHomeRequestBody {
         }
 
         /**
-         * metaData map cannot exceed {@value com.synopsys.integration.phonehome.PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
+         * metaData map cannot exceed {@value PhoneHomeRequestBody#MAX_META_DATA_CHARACTERS}
          * @return true if the all the data was successfully added,
          * false if one or more of the entries entries would make the map exceed it's size limit
          */

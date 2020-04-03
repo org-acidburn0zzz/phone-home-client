@@ -29,11 +29,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class PhoneHomeService {
     private final IntLogger logger;
     private final PhoneHomeClient phoneHomeClient;
     private final ExecutorService executorService;
+
+    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+        this.logger = logger;
+        this.phoneHomeClient = phoneHomeClient;
+        this.executorService = executorService;
+    }
 
     public static PhoneHomeService createPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient) {
         return new PhoneHomeService(logger, phoneHomeClient, null);
@@ -41,12 +48,6 @@ public class PhoneHomeService {
 
     public static PhoneHomeService createAsynchronousPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
         return new PhoneHomeService(logger, phoneHomeClient, executorService);
-    }
-
-    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
-        this.logger = logger;
-        this.phoneHomeClient = phoneHomeClient;
-        this.executorService = executorService;
     }
 
     public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody) {

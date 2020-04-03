@@ -21,6 +21,7 @@ import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class PhoneHomeClientUnitTest {
     private static final RequestConfig DEFAULT_REQUEST_CONFIG = PhoneHomeClient.createInitialRequestConfigBuilder(5).build();

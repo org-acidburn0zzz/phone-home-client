@@ -30,7 +30,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestTransformer {
     private final List<NameValuePair> parameters = new ArrayList<>();

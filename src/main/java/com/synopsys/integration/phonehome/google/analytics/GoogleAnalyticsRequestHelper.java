@@ -39,7 +39,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestHelper {
     private final Gson gson;

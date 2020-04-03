@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsRequestHelper;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class PhoneHomeClient {
     public static final String BLACKDUCK_SKIP_PHONE_HOME_VARIABLE = "BLACKDUCK_SKIP_PHONE_HOME";

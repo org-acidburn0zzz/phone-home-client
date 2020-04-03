@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.Gson;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
 import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestHelperTest {
     private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
