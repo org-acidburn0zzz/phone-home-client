@@ -25,7 +25,7 @@ package com.synopsys.integration.phonehome.request;
 import java.util.List;
 import java.util.Map;
 
-public abstract class IntegrationPhoneHomeRequestBuilder<SUPER_CLASS> {
+public abstract class IntegrationPhoneHomeRequestBuilder<SUPER_CLASS extends IntegrationPhoneHomeRequestBuilder> {
     protected final PhoneHomeRequestBody.Builder actualBuilder;
 
     public IntegrationPhoneHomeRequestBuilder(final PhoneHomeRequestBody.Builder actualBuilder) {
