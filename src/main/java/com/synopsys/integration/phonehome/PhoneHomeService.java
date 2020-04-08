@@ -22,6 +22,10 @@
  */
 package com.synopsys.integration.phonehome;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -30,17 +34,13 @@ import java.util.concurrent.Future;
 
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 public class PhoneHomeService {
     private final IntLogger logger;
     private final PhoneHomeClient phoneHomeClient;
     private final ExecutorService executorService;
-
-    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
-        this.logger = logger;
-        this.phoneHomeClient = phoneHomeClient;
-        this.executorService = executorService;
-    }
 
     public static PhoneHomeService createPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient) {
         return new PhoneHomeService(logger, phoneHomeClient, null);
@@ -48,6 +48,12 @@ public class PhoneHomeService {
 
     public static PhoneHomeService createAsynchronousPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
         return new PhoneHomeService(logger, phoneHomeClient, executorService);
+    }
+
+    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+        this.logger = logger;
+        this.phoneHomeClient = phoneHomeClient;
+        this.executorService = executorService;
     }
 
     public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody) {
@@ -94,4 +100,11 @@ public class PhoneHomeService {
             return result;
         }
     }
+
+    public String md5Hash(final String string) throws NoSuchAlgorithmException {
+        final MessageDigest md = MessageDigest.getInstance(MessageDigestAlgorithms.MD5);
+        final byte[] hashedBytes = md.digest(string.getBytes(StandardCharsets.UTF_8));
+        return DigestUtils.md5Hex(hashedBytes);
+    }
+
 }

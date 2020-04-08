@@ -72,12 +72,12 @@ public class GoogleAnalyticsRequestTransformer {
 
     private String generateClientId(final String customerId, final String hostName) {
         final String clientId;
-        if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
+        if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(customerId)) {
             clientId = customerId;
-        } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
+        } else if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(hostName)) {
             clientId = hostName;
         } else {
-            clientId = PhoneHomeRequestBody.Builder.UNKNOWN_ID;
+            clientId = PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE;
         }
 
         final byte[] bytesFromString = clientId.getBytes();

@@ -1,11 +1,10 @@
 package com.synopsys.integration.phonehome.google.analytics;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
+import com.google.gson.Gson;
+import com.synopsys.integration.log.LogLevel;
+import com.synopsys.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.phonehome.request.BlackDuckPhoneHomeRequestFactory;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -13,14 +12,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.Gson;
-import com.synopsys.integration.log.LogLevel;
-import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
-import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static org.junit.Assert.assertEquals;
 
 public class GoogleAnalyticsRequestHelperTest {
     private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+
+    private BlackDuckPhoneHomeRequestFactory BLACK_DUCK_FACTORY = new BlackDuckPhoneHomeRequestFactory("fake_artifact_id");
 
     @BeforeEach
     public void init() {
@@ -32,22 +33,16 @@ public class GoogleAnalyticsRequestHelperTest {
     public void basicRequestTest() throws IOException {
         final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
 
-        final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
-        bodyBuilder.setCustomerId("fake_customer_id");
-        bodyBuilder.setHostName("fake_host_name");
-        bodyBuilder.setArtifactId("fake_artifact_id");
-        bodyBuilder.setArtifactVersion("fake_artifact_version");
-        bodyBuilder.setProductId(ProductIdEnum.CODE_CENTER);
-        bodyBuilder.setProductVersion("fake_product_version");
-
-        bodyBuilder.addToMetaData("exampleMetaData_1", "data");
-        bodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
-        bodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
-        bodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
+        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = BLACK_DUCK_FACTORY
+                .create("fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
+        phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_1", "data");
+        phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+        phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
+        phoneHomeRequestBodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
 
         final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
 
-        final HttpPost request = helper.createRequest(bodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        final HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
         final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
 
         String nextRequestLine;
@@ -76,21 +71,15 @@ public class GoogleAnalyticsRequestHelperTest {
     public void batchRequestTest() throws IOException {
         final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
 
-        final PhoneHomeRequestBody.Builder bodyBuilder = new PhoneHomeRequestBody.Builder();
-        bodyBuilder.setCustomerId("fake_customer_id");
-        bodyBuilder.setHostName("fake_host_name");
-        bodyBuilder.setArtifactId("fake_artifact_id");
-        bodyBuilder.setArtifactVersion("fake_artifact_version");
-        bodyBuilder.setProductId(ProductIdEnum.CODE_CENTER);
-        bodyBuilder.setProductVersion("fake_product_version");
-        bodyBuilder.setArtifactModules("fake_module_1", "fake_module_2", "fake_module_3");
-
-        bodyBuilder.addToMetaData("exampleMetaData_1", "data");
-        bodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = BLACK_DUCK_FACTORY
+                .create("fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
+        phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_1", "data");
+        phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
+        phoneHomeRequestBodyBuilder.addArtifactModules("fake_module_1", "fake_module_2", "fake_module_3");
 
         final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
 
-        final HttpPost request = helper.createRequest(bodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        final HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
         final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
 
         String nextRequestLine;
