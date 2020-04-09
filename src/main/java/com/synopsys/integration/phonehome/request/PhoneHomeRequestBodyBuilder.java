@@ -41,7 +41,7 @@ public class PhoneHomeRequestBodyBuilder {
 
     public PhoneHomeRequestBodyBuilder(String customerId, String hostName, NameVersion artifactInfo, UniquePhoneHomeProduct product, String productVersion) {
         if (null == product || null == artifactInfo || StringUtils.isAnyBlank(customerId, hostName, artifactInfo.getName(), artifactInfo.getVersion(), product.getName(), productVersion)) {
-            throw new IllegalArgumentException("The fields: customerId, hostName, artifactInfo, and productInfo are all required.");
+            throw new IllegalArgumentException("The fields: customerId, hostName, artifactInfo, and product (with a non-blank name), and productVersion are all required.");
         }
 
         this.customerId = customerId;
