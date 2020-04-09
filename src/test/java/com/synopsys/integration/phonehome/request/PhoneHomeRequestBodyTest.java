@@ -1,12 +1,11 @@
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.synopsys.integration.phonehome.request.PhoneHomeRequestFactory.useKnownVersion;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PhoneHomeRequestBodyTest {
     @Test
     public void testBuildingImmutablePhoneHomeRequestBody() {
-        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", ProductIdEnum.BLACK_DUCK);
+        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.BLACK_DUCK);
         PhoneHomeRequestBodyBuilder builder = defaultPhoneHomeRequestFactory.create("customerId", "hostName", "artifactVersion", "productVersion");
 
         builder.addArtifactModules("module1", "module2");
@@ -30,7 +29,7 @@ public class PhoneHomeRequestBodyTest {
         assertEquals("artifactVersion", phoneHomeRequestBody.getArtifactVersion());
         assertEquals("customerId", phoneHomeRequestBody.getCustomerId());
         assertEquals("hostName", phoneHomeRequestBody.getHostName());
-        assertEquals(ProductIdEnum.BLACK_DUCK, phoneHomeRequestBody.getProductId());
+        assertEquals(UniquePhoneHomeProduct.BLACK_DUCK.getName(), phoneHomeRequestBody.getProductName());
         assertEquals("productVersion", phoneHomeRequestBody.getProductVersion());
 
         assertEquals(2, phoneHomeRequestBody.getMetaData().size());
@@ -46,8 +45,8 @@ public class PhoneHomeRequestBodyTest {
 
     @Test
     public void validatePhoneHomeRequestBuilding() throws Exception {
-        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", ProductIdEnum.CODE_CENTER);
-        PhoneHomeRequestBodyBuilder builder = defaultPhoneHomeRequestFactory.create("customerId", "hostName", useKnownVersion("artifactVersion"), useKnownVersion("productVersion"));
+        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.CODE_CENTER);
+        PhoneHomeRequestBodyBuilder builder = defaultPhoneHomeRequestFactory.create("customerId", "hostName", "artifactVersion", "productVersion");
 
         Map<String, String> expectedMetaData = new HashMap<>();
         expectedMetaData.put("example_meta_data", "data");
@@ -58,7 +57,7 @@ public class PhoneHomeRequestBodyTest {
         assertEquals("customerId", phoneHomeRequest.getCustomerId());
         assertEquals("artifactId", phoneHomeRequest.getArtifactId());
         assertEquals("artifactVersion", phoneHomeRequest.getArtifactVersion());
-        assertEquals(ProductIdEnum.CODE_CENTER, phoneHomeRequest.getProductId());
+        assertEquals(UniquePhoneHomeProduct.CODE_CENTER.getName(), phoneHomeRequest.getProductName());
         assertEquals("productVersion", phoneHomeRequest.getProductVersion());
         assertEquals(expectedMetaData, phoneHomeRequest.getMetaData());
     }

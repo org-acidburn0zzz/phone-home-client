@@ -22,7 +22,7 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import com.synopsys.integration.util.NameVersion;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,15 +33,11 @@ import static com.synopsys.integration.phonehome.request.PhoneHomeRequestBody.UN
 
 public abstract class PhoneHomeRequestFactory {
     protected String artifactId;
-    protected ProductIdEnum productId;
+    protected UniquePhoneHomeProduct product;
 
-    public static Supplier<Optional<String>> useKnownVersion(String version) {
-        return () -> Optional.of(version);
-    }
-
-    public PhoneHomeRequestFactory(String artifactId, ProductIdEnum productId) {
+    public PhoneHomeRequestFactory(String artifactId, UniquePhoneHomeProduct product) {
         this.artifactId = artifactId;
-        this.productId = productId;
+        this.product = product;
     }
 
     public abstract PhoneHomeRequestBodyBuilder create(String customerId, String hostName, Supplier<Optional<String>> artifactVersionSupplier, Supplier<Optional<String>> productVersionSupplier);
@@ -50,16 +46,16 @@ public abstract class PhoneHomeRequestFactory {
 
     protected PhoneHomeRequestBodyBuilder createBase(String customerId, String hostName, Supplier<Optional<String>> artifactVersionSupplier, Supplier<Optional<String>> productVersionSupplier) {
         NameVersion artifactInfo = new NameVersion(artifactId, getVersionWithDefault(artifactVersionSupplier));
-        NameVersion productInfo = new NameVersion(productId.name(), getVersionWithDefault(productVersionSupplier));
+        String productVersion = getVersionWithDefault(productVersionSupplier);
 
-        return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, productInfo);
+        return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, product, productVersion);
     }
 
     protected PhoneHomeRequestBodyBuilder createBase(String customerId, String hostName, String artifactVersion, String productVersion) {
         NameVersion artifactInfo = new NameVersion(artifactId, getVersionWithDefault(artifactVersion));
-        NameVersion productInfo = new NameVersion(productId.name(), getVersionWithDefault(productVersion));
+        productVersion = getVersionWithDefault(productVersion);
 
-        return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, productInfo);
+        return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, product, productVersion);
     }
 
     public String getVersionWithDefault(Supplier<Optional<String>> version) {

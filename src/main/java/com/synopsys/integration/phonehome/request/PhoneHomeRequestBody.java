@@ -22,7 +22,7 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import com.synopsys.integration.util.NameVersion;
 
 import java.util.Collections;
@@ -38,26 +38,29 @@ public class PhoneHomeRequestBody {
     private final String customerId;
     private final String hostName;
     private final NameVersion artifactInfo;
-    private final NameVersion productInfo;
+    private final UniquePhoneHomeProduct product;
+    private final String productVersion;
     private final List<String> artifactModules;
     private final Map<String, String> metaData;
 
-    public PhoneHomeRequestBody(String customerId, String hostName, NameVersion artifactInfo, NameVersion productInfo, List<String> artifactModules, Map<String, String> metaData) {
+    public PhoneHomeRequestBody(String customerId, String hostName, NameVersion artifactInfo, UniquePhoneHomeProduct product, String productVersion, List<String> artifactModules, Map<String, String> metaData) {
         this.customerId = customerId;
         this.hostName = hostName;
         this.artifactInfo = artifactInfo;
-        this.productInfo = productInfo;
+        this.product = product;
+        this.productVersion = productVersion;
         this.artifactModules = Collections.unmodifiableList(artifactModules);
         this.metaData = Collections.unmodifiableMap(metaData);
     }
 
-    PhoneHomeRequestBody(PhoneHomeRequestBodyBuilder mutablePhoneHomeRequestBody) {
-        this.customerId = mutablePhoneHomeRequestBody.getCustomerId();
-        this.hostName = mutablePhoneHomeRequestBody.getHostName();
-        this.artifactInfo = mutablePhoneHomeRequestBody.getArtifactInfo();
-        this.productInfo = mutablePhoneHomeRequestBody.getProductInfo();
-        this.artifactModules = Collections.unmodifiableList(mutablePhoneHomeRequestBody.getArtifactModules());
-        this.metaData = Collections.unmodifiableMap(mutablePhoneHomeRequestBody.getMetaData());
+    PhoneHomeRequestBody(PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder) {
+        this.customerId = phoneHomeRequestBodyBuilder.getCustomerId();
+        this.hostName = phoneHomeRequestBodyBuilder.getHostName();
+        this.artifactInfo = phoneHomeRequestBodyBuilder.getArtifactInfo();
+        this.product = phoneHomeRequestBodyBuilder.getProduct();
+        this.productVersion = phoneHomeRequestBodyBuilder.getProductVersion();
+        this.artifactModules = Collections.unmodifiableList(phoneHomeRequestBodyBuilder.getArtifactModules());
+        this.metaData = Collections.unmodifiableMap(phoneHomeRequestBodyBuilder.getMetaData());
     }
 
     public String getCustomerId() {
@@ -76,12 +79,12 @@ public class PhoneHomeRequestBody {
         return artifactInfo.getVersion();
     }
 
-    public ProductIdEnum getProductId() {
-        return ProductIdEnum.valueOf(productInfo.getName());
+    public String getProductName() {
+        return product.getName();
     }
 
     public String getProductVersion() {
-        return productInfo.getVersion();
+        return productVersion;
     }
 
     public Map<String, String> getMetaData() {

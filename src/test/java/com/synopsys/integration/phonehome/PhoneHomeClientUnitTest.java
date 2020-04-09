@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.synopsys.integration.log.BufferedIntLogger;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
 import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.synopsys.integration.phonehome.request.DefaultPhoneHomeRequestFactory;
@@ -27,7 +26,7 @@ public class PhoneHomeClientUnitTest {
 
     private Map<String, String> defaultEnvironmentVariables;
     private PhoneHomeClient defaultClient;
-    private DefaultPhoneHomeRequestFactory CODE_CENTER_FACTORY = new DefaultPhoneHomeRequestFactory("artifactId", ProductIdEnum.CODE_CENTER);
+    private DefaultPhoneHomeRequestFactory CODE_CENTER_FACTORY = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.CODE_CENTER);
 
     @BeforeEach
     public void init() {

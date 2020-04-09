@@ -22,6 +22,7 @@
  */
 package com.synopsys.integration.phonehome.request;
 
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import com.synopsys.integration.util.NameVersion;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,18 +34,21 @@ public class PhoneHomeRequestBodyBuilder {
     private final String customerId;
     private final String hostName;
     private final NameVersion artifactInfo;
-    private final NameVersion productInfo;
+    private final UniquePhoneHomeProduct product;
+    private final String productVersion;
     private final List<String> artifactModules = new ArrayList<>();
     private final Map<String, String> metaData = new HashMap<>();
 
-    public PhoneHomeRequestBodyBuilder(String customerId, String hostName, NameVersion artifactInfo, NameVersion productInfo) {
+    public PhoneHomeRequestBodyBuilder(String customerId, String hostName, NameVersion artifactInfo, UniquePhoneHomeProduct product, String productVersion) {
+        if (null == product || null == artifactInfo || StringUtils.isAnyBlank(customerId, hostName, artifactInfo.getName(), artifactInfo.getVersion(), product.getName(), productVersion)) {
+            throw new IllegalArgumentException("The fields: customerId, hostName, artifactInfo, and productInfo are all required.");
+        }
+
         this.customerId = customerId;
         this.hostName = hostName;
         this.artifactInfo = artifactInfo;
-        this.productInfo = productInfo;
-        if (StringUtils.isAnyBlank(customerId, hostName, artifactInfo.getName(), artifactInfo.getVersion(), productInfo.getName(), productInfo.getVersion())) {
-            throw new IllegalArgumentException("The fields: customerId, hostName, artifactInfo, and productInfo are all required.");
-        }
+        this.product = product;
+        this.productVersion = productVersion;
     }
 
     public PhoneHomeRequestBody build() {
@@ -101,8 +105,12 @@ public class PhoneHomeRequestBodyBuilder {
         return artifactInfo;
     }
 
-    public NameVersion getProductInfo() {
-        return productInfo;
+    public UniquePhoneHomeProduct getProduct() {
+        return product;
+    }
+
+    public String getProductVersion() {
+        return productVersion;
     }
 
     public List<String> getArtifactModules() {

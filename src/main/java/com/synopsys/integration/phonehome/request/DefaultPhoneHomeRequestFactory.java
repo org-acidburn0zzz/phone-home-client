@@ -22,16 +22,14 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
-import com.synopsys.integration.util.NameVersion;
-import org.apache.commons.lang3.StringUtils;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DefaultPhoneHomeRequestFactory extends PhoneHomeRequestFactory {
-    public DefaultPhoneHomeRequestFactory(String artifactId, ProductIdEnum productId) {
-        super(artifactId, productId);
+    public DefaultPhoneHomeRequestFactory(String artifactId, UniquePhoneHomeProduct product) {
+        super(artifactId, product);
     }
 
     public PhoneHomeRequestBodyBuilder create(String customerId, String hostName, Supplier<Optional<String>> artifactVersionSupplier, Supplier<Optional<String>> productVersionSupplier) {

@@ -22,14 +22,14 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class BlackDuckPhoneHomeRequestFactory extends PhoneHomeRequestFactory {
     public BlackDuckPhoneHomeRequestFactory(String integrationRepoName) {
-        super(integrationRepoName, ProductIdEnum.BLACK_DUCK);
+        super(integrationRepoName, UniquePhoneHomeProduct.BLACK_DUCK);
     }
 
     @Override

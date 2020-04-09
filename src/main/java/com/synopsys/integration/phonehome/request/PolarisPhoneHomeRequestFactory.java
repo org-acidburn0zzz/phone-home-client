@@ -22,14 +22,14 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.synopsys.integration.phonehome.enums.ProductIdEnum;
+import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class PolarisPhoneHomeRequestFactory extends PhoneHomeRequestFactory {
     public PolarisPhoneHomeRequestFactory(String integrationRepoName) {
-        super(integrationRepoName, ProductIdEnum.POLARIS);
+        super(integrationRepoName, UniquePhoneHomeProduct.POLARIS);
     }
 
     @Override
