@@ -30,7 +30,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.phonehome.PhoneHomeRequestBody;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestTransformer {
     private final List<NameValuePair> parameters = new ArrayList<>();
@@ -58,7 +58,7 @@ public class GoogleAnalyticsRequestTransformer {
         addParameter(GoogleAnalyticsConstants.HOST_NAME, phoneHomeRequestBody.getHostName());
         addParameter(GoogleAnalyticsConstants.ARTIFACT_ID, phoneHomeRequestBody.getArtifactId());
         addParameter(GoogleAnalyticsConstants.ARTIFACT_VERSION, phoneHomeRequestBody.getArtifactVersion());
-        addParameter(GoogleAnalyticsConstants.PRODUCT_ID, phoneHomeRequestBody.getProductId().name());
+        addParameter(GoogleAnalyticsConstants.PRODUCT_ID, phoneHomeRequestBody.getProductName());
         addParameter(GoogleAnalyticsConstants.PRODUCT_VERSION, phoneHomeRequestBody.getProductVersion());
         addParameter(GoogleAnalyticsConstants.META_DATA, gson.toJson(phoneHomeRequestBody.getMetaData()));
 
@@ -72,12 +72,12 @@ public class GoogleAnalyticsRequestTransformer {
 
     private String generateClientId(final String customerId, final String hostName) {
         final String clientId;
-        if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(customerId)) {
+        if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(customerId)) {
             clientId = customerId;
-        } else if (!PhoneHomeRequestBody.Builder.UNKNOWN_ID.equals(hostName)) {
+        } else if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(hostName)) {
             clientId = hostName;
         } else {
-            clientId = PhoneHomeRequestBody.Builder.UNKNOWN_ID;
+            clientId = PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE;
         }
 
         final byte[] bytesFromString = clientId.getBytes();
