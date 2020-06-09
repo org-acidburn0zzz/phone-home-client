@@ -3,7 +3,6 @@ package com.synopsys.integration.phonehome.google.analytics;
 import com.google.gson.Gson;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
-import com.synopsys.integration.phonehome.request.BlackDuckPhoneHomeRequestFactory;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -21,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 public class GoogleAnalyticsRequestHelperTest {
     private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
 
-    private BlackDuckPhoneHomeRequestFactory BLACK_DUCK_FACTORY = new BlackDuckPhoneHomeRequestFactory("fake_artifact_id");
+    //private BlackDuckPhoneHomeRequestFactory BLACK_DUCK_FACTORY = new BlackDuckPhoneHomeRequestFactory("fake_artifact_id");
 
     @BeforeEach
     public void init() {
@@ -33,8 +32,7 @@ public class GoogleAnalyticsRequestHelperTest {
     public void basicRequestTest() throws IOException {
         final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
 
-        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = BLACK_DUCK_FACTORY
-                .create("fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
+        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = PhoneHomeRequestBodyBuilder.createForBlackDuck("fake_artifact_id", "fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_1", "data");
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
@@ -71,8 +69,7 @@ public class GoogleAnalyticsRequestHelperTest {
     public void batchRequestTest() throws IOException {
         final String debugUrl = GoogleAnalyticsConstants.BASE_URL + GoogleAnalyticsConstants.DEBUG_ENDPOINT;
 
-        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = BLACK_DUCK_FACTORY
-                .create("fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
+        PhoneHomeRequestBodyBuilder phoneHomeRequestBodyBuilder = PhoneHomeRequestBodyBuilder.createForBlackDuck("fake_artifact_id", "fake_customer_id", "fake_host_name", "fake_artifact_version", "fake_product_version");
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_1", "data");
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
         phoneHomeRequestBodyBuilder.addArtifactModules("fake_module_1", "fake_module_2", "fake_module_3");

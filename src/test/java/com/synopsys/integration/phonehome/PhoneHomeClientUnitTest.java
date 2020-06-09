@@ -6,8 +6,8 @@ import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
-import com.synopsys.integration.phonehome.request.DefaultPhoneHomeRequestFactory;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.HttpHost;
@@ -26,7 +26,6 @@ public class PhoneHomeClientUnitTest {
 
     private Map<String, String> defaultEnvironmentVariables;
     private PhoneHomeClient defaultClient;
-    private DefaultPhoneHomeRequestFactory CODE_CENTER_FACTORY = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.CODE_CENTER);
 
     @BeforeEach
     public void init() {
@@ -40,8 +39,8 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeIntegrationsTest() throws Exception {
-        PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
-                .create("customerId", "hostName", "artifactVersion", "productVersion")
+        PhoneHomeRequestBody phoneHomeRequest = PhoneHomeRequestBodyBuilder
+                .createForProduct(UniquePhoneHomeProduct.CODE_CENTER, "artifactId", "customerId", "hostName", "artifactVersion", "productVersion")
                 .build();
 
         defaultClient.postPhoneHomeRequest(phoneHomeRequest, defaultEnvironmentVariables);
@@ -52,8 +51,8 @@ public class PhoneHomeClientUnitTest {
         BufferedIntLogger logger = new BufferedIntLogger();
         PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(logger, DEFAULT_REQUEST_CONFIG);
 
-        PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
-                .create("customerId", "hostName", "artifactVersion", "productVersion")
+        PhoneHomeRequestBody phoneHomeRequest = PhoneHomeRequestBodyBuilder
+                .createForProduct(UniquePhoneHomeProduct.CODE_CENTER, "artifactId", "customerId", "hostName", "artifactVersion", "productVersion")
                 .build();
 
         defaultEnvironmentVariables.put(PhoneHomeClient.SKIP_PHONE_HOME_VARIABLE, "true");

@@ -13,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PhoneHomeRequestBodyTest {
     @Test
     public void testBuildingImmutablePhoneHomeRequestBody() {
-        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.BLACK_DUCK);
-        PhoneHomeRequestBodyBuilder builder = defaultPhoneHomeRequestFactory.create("customerId", "hostName", "artifactVersion", "productVersion");
+        PhoneHomeRequestBodyBuilder builder = PhoneHomeRequestBodyBuilder.createForBlackDuck("artifactId", "customerId", "hostName", "artifactVersion", "productVersion");
 
         builder.addArtifactModules("module1", "module2");
         builder.addToMetaData("metaKey", "metaValue");
@@ -45,14 +44,13 @@ public class PhoneHomeRequestBodyTest {
 
     @Test
     public void validatePhoneHomeRequestBuilding() throws Exception {
-        DefaultPhoneHomeRequestFactory defaultPhoneHomeRequestFactory = new DefaultPhoneHomeRequestFactory("artifactId", UniquePhoneHomeProduct.CODE_CENTER);
-        PhoneHomeRequestBodyBuilder builder = defaultPhoneHomeRequestFactory.create("customerId", "hostName", "artifactVersion", "productVersion");
+        PhoneHomeRequestBodyBuilder builder = PhoneHomeRequestBodyBuilder.createForProduct(UniquePhoneHomeProduct.CODE_CENTER, "artifactId", "customerId", "hostName", "artifactVersion", "productVersion");
 
         Map<String, String> expectedMetaData = new HashMap<>();
         expectedMetaData.put("example_meta_data", "data");
         builder.addAllToMetaData(expectedMetaData);
 
-        final PhoneHomeRequestBody phoneHomeRequest = builder.build();
+        PhoneHomeRequestBody phoneHomeRequest = builder.build();
 
         assertEquals("customerId", phoneHomeRequest.getCustomerId());
         assertEquals("artifactId", phoneHomeRequest.getArtifactId());

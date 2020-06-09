@@ -1,8 +1,8 @@
 /**
  * phone-home-client
- * <p>
+ *
  * Copyright (c) 2020 Synopsys, Inc.
- * <p>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -10,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,21 +41,22 @@ public class PhoneHomeRequestBodyBuilder {
     private final Map<String, String> metaData = new HashMap<>();
 
     public static PhoneHomeRequestBodyBuilder createForBlackDuck(String integrationRepoName, String registrationId, String blackDuckServerUrl, String integrationVersion, String blackDuckVersion) {
-        return createBase(UniquePhoneHomeProduct.BLACK_DUCK, integrationRepoName, registrationId, blackDuckServerUrl, integrationVersion, blackDuckVersion);
+        return createForProduct(UniquePhoneHomeProduct.BLACK_DUCK, integrationRepoName, registrationId, blackDuckServerUrl, integrationVersion, blackDuckVersion);
     }
 
     public static PhoneHomeRequestBodyBuilder createForCoverity(String integrationRepoName, String customerName, String cimServerUrl, String integrationVersion, String cimVersion) {
-        return createBase(UniquePhoneHomeProduct.COVERITY, integrationRepoName, customerName, cimServerUrl, integrationVersion, cimVersion);
+        return createForProduct(UniquePhoneHomeProduct.COVERITY, integrationRepoName, customerName, cimServerUrl, integrationVersion, cimVersion);
     }
 
     public static PhoneHomeRequestBodyBuilder createForPolaris(String integrationRepoName, String registrationId, String polarisServerUrl, String integrationVersion, String polarisVersion) {
-        return createBase(UniquePhoneHomeProduct.POLARIS, integrationRepoName, registrationId, polarisServerUrl, integrationVersion, polarisVersion);
+        return createForProduct(UniquePhoneHomeProduct.POLARIS, integrationRepoName, registrationId, polarisServerUrl, integrationVersion, polarisVersion);
     }
 
-    private static PhoneHomeRequestBodyBuilder createBase(UniquePhoneHomeProduct product, String artifactId, String customerId, String hostName, String artifactVersion, String productVersion) {
-        NameVersion artifactInfo = new NameVersion(artifactId, getVersionWithDefault(artifactVersion));
-        productVersion = getVersionWithDefault(productVersion);
+    public static PhoneHomeRequestBodyBuilder createForProduct(UniquePhoneHomeProduct product, String artifactId, String customerId, String hostName, String artifactVersion, String productVersion) {
+        artifactVersion = StringUtils.defaultIfEmpty(artifactVersion, UNKNOWN_FIELD_VALUE);
+        productVersion = StringUtils.defaultIfEmpty(productVersion, UNKNOWN_FIELD_VALUE);
 
+        NameVersion artifactInfo = new NameVersion(artifactId, artifactVersion);
         return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, product, productVersion);
     }
 
