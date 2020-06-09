@@ -5,10 +5,10 @@ import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.phonehome.request.BlackDuckPhoneHomeRequestFactory;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,24 +40,24 @@ public class GoogleAnalyticsRequestHelperTest {
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_3", "special chars: !@#$%^&*()<>?,.;`~\\|{{}[]]-=_+");
         phoneHomeRequestBodyBuilder.addToMetaData("example meta data 4", "string \" with \"quotes\" \"    \" ");
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
+        GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
 
-        final HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
-        final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
+        HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
 
         String nextRequestLine;
         while ((nextRequestLine = requestReader.readLine()) != null) {
             logger.info(nextRequestLine);
         }
 
-        final HttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(request);
 
-        final HttpResponse response = client.execute(request);
-        int responseCode = response.getStatusLine().getStatusCode();
+        int responseCode = response.getCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
         logger.info("Response String:");
         while ((nextLine = reader.readLine()) != null) {
@@ -77,24 +77,24 @@ public class GoogleAnalyticsRequestHelperTest {
         phoneHomeRequestBodyBuilder.addToMetaData("exampleMetaData_2", "other Data");
         phoneHomeRequestBodyBuilder.addArtifactModules("fake_module_1", "fake_module_2", "fake_module_3");
 
-        final GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
+        GoogleAnalyticsRequestHelper helper = new GoogleAnalyticsRequestHelper(new Gson());
 
-        final HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
-        final BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
+        HttpPost request = helper.createRequest(phoneHomeRequestBodyBuilder.build(), debugUrl, GoogleAnalyticsConstants.TEST_INTEGRATIONS_TRACKING_ID);
+        BufferedReader requestReader = new BufferedReader(new InputStreamReader(request.getEntity().getContent()));
 
         String nextRequestLine;
         while ((nextRequestLine = requestReader.readLine()) != null) {
             logger.info(nextRequestLine);
         }
 
-        final HttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(request);
 
-        final HttpResponse response = client.execute(request);
-        int responseCode = response.getStatusLine().getStatusCode();
+        int responseCode = response.getCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
         logger.info("Response String:");
         while ((nextLine = reader.readLine()) != null) {

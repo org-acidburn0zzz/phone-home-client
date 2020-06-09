@@ -1,8 +1,8 @@
 /**
  * phone-home-client
- *
+ * <p>
  * Copyright (c) 2020 Synopsys, Inc.
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -10,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,16 +31,16 @@ public class PhoneHomeResponse {
     private final Future<Boolean> phoneHomeTask;
     private final Boolean result;
 
-    private PhoneHomeResponse(final Future<Boolean> phoneHomeTask, final Boolean result) {
+    private PhoneHomeResponse(Future<Boolean> phoneHomeTask, Boolean result) {
         this.phoneHomeTask = phoneHomeTask;
         this.result = result;
     }
 
-    public static PhoneHomeResponse createResponse(final Boolean result) {
+    public static PhoneHomeResponse createResponse(Boolean result) {
         return new PhoneHomeResponse(null, result);
     }
 
-    public static PhoneHomeResponse createAsynchronousResponse(final Future<Boolean> phoneHomeTask) {
+    public static PhoneHomeResponse createAsynchronousResponse(Future<Boolean> phoneHomeTask) {
         return new PhoneHomeResponse(phoneHomeTask, Boolean.FALSE);
     }
 
@@ -55,13 +55,13 @@ public class PhoneHomeResponse {
     /**
      * @param timeoutInSeconds time to wait before cancelling the task
      */
-    public Boolean awaitResult(final long timeoutInSeconds) {
+    public Boolean awaitResult(long timeoutInSeconds) {
         if (phoneHomeTask != null) {
             try {
                 return phoneHomeTask.get(timeoutInSeconds, TimeUnit.SECONDS);
-            } catch (final ExecutionException | TimeoutException e) {
+            } catch (ExecutionException | TimeoutException e) {
                 return Boolean.FALSE;
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return Boolean.FALSE;
             } finally {
@@ -86,4 +86,5 @@ public class PhoneHomeResponse {
         }
         return false;
     }
+
 }

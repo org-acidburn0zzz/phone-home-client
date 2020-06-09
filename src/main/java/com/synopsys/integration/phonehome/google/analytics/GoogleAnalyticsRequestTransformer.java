@@ -22,15 +22,14 @@
  */
 package com.synopsys.integration.phonehome.google.analytics;
 
+import com.google.gson.Gson;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import com.google.gson.Gson;
-import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 
 public class GoogleAnalyticsRequestTransformer {
     private final List<NameValuePair> parameters = new ArrayList<>();
@@ -38,7 +37,7 @@ public class GoogleAnalyticsRequestTransformer {
     private final String trackingId;
     private final Gson gson;
 
-    public GoogleAnalyticsRequestTransformer(final Gson gson, final String trackingId, final PhoneHomeRequestBody phoneHomeRequestBody) {
+    public GoogleAnalyticsRequestTransformer(Gson gson, String trackingId, PhoneHomeRequestBody phoneHomeRequestBody) {
         this.gson = gson;
         this.phoneHomeRequestBody = phoneHomeRequestBody;
         this.trackingId = trackingId;
@@ -65,13 +64,13 @@ public class GoogleAnalyticsRequestTransformer {
         return parameters;
     }
 
-    private void addParameter(final String key, final String value) {
-        final NameValuePair parameter = new BasicNameValuePair(key, value);
+    private void addParameter(String key, String value) {
+        NameValuePair parameter = new BasicNameValuePair(key, value);
         parameters.add(parameter);
     }
 
-    private String generateClientId(final String customerId, final String hostName) {
-        final String clientId;
+    private String generateClientId(String customerId, String hostName) {
+        String clientId;
         if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(customerId)) {
             clientId = customerId;
         } else if (!PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE.equals(hostName)) {
@@ -80,7 +79,8 @@ public class GoogleAnalyticsRequestTransformer {
             clientId = PhoneHomeRequestBody.UNKNOWN_FIELD_VALUE;
         }
 
-        final byte[] bytesFromString = clientId.getBytes();
+        byte[] bytesFromString = clientId.getBytes();
         return UUID.nameUUIDFromBytes(bytesFromString).toString();
     }
+
 }

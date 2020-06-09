@@ -1,8 +1,8 @@
 /**
  * phone-home-client
- *
+ * <p>
  * Copyright (c) 2020 Synopsys, Inc.
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -10,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,56 +22,53 @@
  */
 package com.synopsys.integration.phonehome;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
+import com.synopsys.integration.util.NoThreadExecutorService;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import com.synopsys.integration.log.IntLogger;
-import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 public class PhoneHomeService {
     private final IntLogger logger;
     private final PhoneHomeClient phoneHomeClient;
     private final ExecutorService executorService;
 
-    public static PhoneHomeService createPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient) {
-        return new PhoneHomeService(logger, phoneHomeClient, null);
+    public static PhoneHomeService createPhoneHomeService(IntLogger logger, PhoneHomeClient phoneHomeClient) {
+        return new PhoneHomeService(logger, phoneHomeClient, new NoThreadExecutorService());
     }
 
-    public static PhoneHomeService createAsynchronousPhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+    public static PhoneHomeService createAsynchronousPhoneHomeService(IntLogger logger, PhoneHomeClient phoneHomeClient, ExecutorService executorService) {
         return new PhoneHomeService(logger, phoneHomeClient, executorService);
     }
 
-    private PhoneHomeService(final IntLogger logger, final PhoneHomeClient phoneHomeClient, final ExecutorService executorService) {
+    public static PhoneHomeService creatDefaultAsynchronousPhoneHomeService(IntLogger logger) {
+        PhoneHomeClient phoneHomeClient = new PhoneHomeClient(logger);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        return new PhoneHomeService(logger, phoneHomeClient, executorService);
+    }
+
+    public PhoneHomeService(IntLogger logger, PhoneHomeClient phoneHomeClient, ExecutorService executorService) {
         this.logger = logger;
         this.phoneHomeClient = phoneHomeClient;
         this.executorService = executorService;
     }
 
-    public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody) {
+    public PhoneHomeResponse phoneHome(PhoneHomeRequestBody phoneHomeRequestBody) {
         return phoneHome(phoneHomeRequestBody, Collections.emptyMap());
     }
 
-    public PhoneHomeResponse phoneHome(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) {
+    public PhoneHomeResponse phoneHome(PhoneHomeRequestBody phoneHomeRequestBody, Map<String, String> environmentVariables) {
         Future<Boolean> phoneHomeTask = null;
-        final PhoneHomeCallable phoneHomeCallable = new PhoneHomeCallable(phoneHomeRequestBody, environmentVariables);
-        if (executorService == null) {
-            final Boolean result = phoneHomeCallable.call();
-            return PhoneHomeResponse.createResponse(result);
-        } else {
-            try {
-                phoneHomeTask = executorService.submit(phoneHomeCallable);
-            } catch (final Exception e) {
-                logger.debug("Problem executing phone home asynchronously: " + e.getMessage(), e);
-            }
+        PhoneHomeCallable phoneHomeCallable = new PhoneHomeCallable(phoneHomeRequestBody, environmentVariables);
+        try {
+            phoneHomeTask = executorService.submit(phoneHomeCallable);
+        } catch (Exception e) {
+            logger.debug("Problem executing phone home asynchronously: " + e.getMessage(), e);
         }
         return PhoneHomeResponse.createAsynchronousResponse(phoneHomeTask);
     }
@@ -80,7 +77,7 @@ public class PhoneHomeService {
         private final PhoneHomeRequestBody phoneHomeRequestBody;
         private final Map<String, String> environmentVariables;
 
-        public PhoneHomeCallable(final PhoneHomeRequestBody phoneHomeRequestBody, final Map<String, String> environmentVariables) {
+        public PhoneHomeCallable(PhoneHomeRequestBody phoneHomeRequestBody, Map<String, String> environmentVariables) {
             this.phoneHomeRequestBody = phoneHomeRequestBody;
             this.environmentVariables = environmentVariables;
         }
@@ -93,18 +90,12 @@ public class PhoneHomeService {
                 phoneHomeClient.postPhoneHomeRequest(phoneHomeRequestBody, environmentVariables);
                 result = Boolean.TRUE;
                 logger.debug("completed phone home");
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 logger.debug("Phone home error.", ex);
             }
 
             return result;
         }
-    }
-
-    public String md5Hash(final String string) throws NoSuchAlgorithmException {
-        final MessageDigest md = MessageDigest.getInstance(MessageDigestAlgorithms.MD5);
-        final byte[] hashedBytes = md.digest(string.getBytes(StandardCharsets.UTF_8));
-        return DigestUtils.md5Hex(hashedBytes);
     }
 
 }

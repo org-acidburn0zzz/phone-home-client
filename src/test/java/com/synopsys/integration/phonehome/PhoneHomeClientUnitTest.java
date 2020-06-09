@@ -8,9 +8,9 @@ import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.synopsys.integration.phonehome.request.DefaultPhoneHomeRequestFactory;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpHost;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +30,7 @@ public class PhoneHomeClientUnitTest {
 
     @BeforeEach
     public void init() {
-        final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+        PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
         logger.info("\n");
         logger.info("Test Class: PhoneHomeClientUnitTest");
         defaultEnvironmentVariables = new HashMap<>();
@@ -40,7 +40,7 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeIntegrationsTest() throws Exception {
-        final PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
+        PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
                 .create("customerId", "hostName", "artifactVersion", "productVersion")
                 .build();
 
@@ -49,10 +49,10 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void callHomeSkip() throws Exception {
-        final BufferedIntLogger logger = new BufferedIntLogger();
-        final PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(logger, DEFAULT_REQUEST_CONFIG);
+        BufferedIntLogger logger = new BufferedIntLogger();
+        PhoneHomeClient clientWithTrackableLogger = new PhoneHomeClient(logger, DEFAULT_REQUEST_CONFIG);
 
-        final PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
+        PhoneHomeRequestBody phoneHomeRequest = CODE_CENTER_FACTORY
                 .create("customerId", "hostName", "artifactVersion", "productVersion")
                 .build();
 
@@ -69,14 +69,14 @@ public class PhoneHomeClientUnitTest {
 
     @Test
     public void testPhoneHomeException() {
-        final PhoneHomeException emptyException = new PhoneHomeException();
-        final PhoneHomeException exceptionException = new PhoneHomeException(emptyException);
-        final PhoneHomeException messageException = new PhoneHomeException("message");
-        final PhoneHomeException exceptionAndMessageException = new PhoneHomeException("message", emptyException);
-        for (final PhoneHomeException phoneHomeException : new PhoneHomeException[]{emptyException, exceptionException, messageException, exceptionAndMessageException}) {
+        PhoneHomeException emptyException = new PhoneHomeException();
+        PhoneHomeException exceptionException = new PhoneHomeException(emptyException);
+        PhoneHomeException messageException = new PhoneHomeException("message");
+        PhoneHomeException exceptionAndMessageException = new PhoneHomeException("message", emptyException);
+        for (PhoneHomeException phoneHomeException : new PhoneHomeException[]{emptyException, exceptionException, messageException, exceptionAndMessageException}) {
             try {
                 throw phoneHomeException;
-            } catch (final PhoneHomeException e) {
+            } catch (PhoneHomeException e) {
                 // Do nothing
             }
         }
@@ -88,7 +88,7 @@ public class PhoneHomeClientUnitTest {
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
-        } catch (final PhoneHomeException e) {
+        } catch (PhoneHomeException e) {
             // Do nothing
         }
 
@@ -96,7 +96,7 @@ public class PhoneHomeClientUnitTest {
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
-        } catch (final PhoneHomeException e) {
+        } catch (PhoneHomeException e) {
             // Do nothing
         }
 
@@ -104,7 +104,7 @@ public class PhoneHomeClientUnitTest {
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
-        } catch (final PhoneHomeException e) {
+        } catch (PhoneHomeException e) {
             // Do nothing
         }
 
@@ -112,7 +112,7 @@ public class PhoneHomeClientUnitTest {
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
-        } catch (final PhoneHomeException e) {
+        } catch (PhoneHomeException e) {
             // Do nothing
         }
 
@@ -120,14 +120,14 @@ public class PhoneHomeClientUnitTest {
         try {
             phClient.postPhoneHomeRequest(null, Collections.emptyMap());
             fail("Phone home exception not thrown");
-        } catch (final PhoneHomeException e) {
+        } catch (PhoneHomeException e) {
             // Do nothing
         }
     }
 
     @Test
     public void createInitialRequestConfigBuilderWithProxyHostTest() {
-        final HttpHost proxyHost = new HttpHost("localhost:8081");
+        HttpHost proxyHost = new HttpHost("localhost:8081");
         PhoneHomeClient.createInitialRequestConfigBuilder(5, proxyHost);
     }
 
