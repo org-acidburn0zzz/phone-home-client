@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 public class GoogleAnalyticsRequestHelperTest {
     private static final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
 
-    //private BlackDuckPhoneHomeRequestFactory BLACK_DUCK_FACTORY = new BlackDuckPhoneHomeRequestFactory("fake_artifact_id");
-
     @BeforeEach
     public void init() {
         logger.info("\n");
