@@ -8,7 +8,7 @@ import com.synopsys.integration.phonehome.exception.PhoneHomeException;
 import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsConstants;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

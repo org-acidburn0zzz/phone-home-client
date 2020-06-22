@@ -29,10 +29,10 @@ import com.synopsys.integration.phonehome.google.analytics.GoogleAnalyticsReques
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.HttpResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.util.Map;
 
@@ -73,9 +73,9 @@ public class PhoneHomeClient {
                 request = requestHelper.createRequest(phoneHomeRequestBody);
             }
 
-            logger.debug("Phoning home to " + request.getUri());
+            logger.debug("Phoning home to " + request.getURI());
             HttpResponse response = client.execute(request);
-            logger.trace("Response Code: " + response.getCode());
+            logger.trace("Response Code: " + response.getStatusLine().getStatusCode());
         } catch (Exception e) {
             throw new PhoneHomeException(e.getMessage(), e);
         }

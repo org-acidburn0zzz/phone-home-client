@@ -24,8 +24,8 @@ package com.synopsys.integration.phonehome.google.analytics;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBody;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.List;

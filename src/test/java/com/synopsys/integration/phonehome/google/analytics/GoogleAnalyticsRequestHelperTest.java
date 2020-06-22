@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.synopsys.integration.log.LogLevel;
 import com.synopsys.integration.log.PrintStreamIntLogger;
 import com.synopsys.integration.phonehome.request.PhoneHomeRequestBodyBuilder;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +49,7 @@ public class GoogleAnalyticsRequestHelperTest {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(request);
 
-        int responseCode = response.getCode();
+        int responseCode = response.getStatusLine().getStatusCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;
@@ -85,7 +85,7 @@ public class GoogleAnalyticsRequestHelperTest {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(request);
 
-        int responseCode = response.getCode();
+        int responseCode = response.getStatusLine().getStatusCode();
         logger.info("Response Code: " + responseCode);
 
         String nextLine;

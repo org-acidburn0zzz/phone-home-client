@@ -22,10 +22,10 @@
  */
 package com.synopsys.integration.phonehome.request;
 
-import com.sun.istack.internal.Nullable;
 import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import com.synopsys.integration.util.NameVersion;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -53,7 +53,7 @@ public class PhoneHomeRequestBodyBuilder {
         return createForProduct(UniquePhoneHomeProduct.POLARIS, integrationRepoName, organizationName, polarisServerUrl, integrationVersion, polarisVersion);
     }
 
-    public static PhoneHomeRequestBodyBuilder createForProduct(UniquePhoneHomeProduct product, String artifactId, String customerId, String hostName, String artifactVersion, String productVersion) {
+    public static PhoneHomeRequestBodyBuilder createForProduct(UniquePhoneHomeProduct product, String artifactId, String customerId, String hostName, @Nullable String artifactVersion, @Nullable String productVersion) {
         artifactVersion = StringUtils.defaultIfEmpty(artifactVersion, UNKNOWN_FIELD_VALUE);
         productVersion = StringUtils.defaultIfEmpty(productVersion, UNKNOWN_FIELD_VALUE);
 
