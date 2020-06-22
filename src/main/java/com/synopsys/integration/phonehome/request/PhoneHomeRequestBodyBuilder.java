@@ -1,8 +1,8 @@
 /**
  * phone-home-client
- *
+ * <p>
  * Copyright (c) 2020 Synopsys, Inc.
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -10,9 +10,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@
  */
 package com.synopsys.integration.phonehome.request;
 
+import com.sun.istack.internal.Nullable;
 import com.synopsys.integration.phonehome.UniquePhoneHomeProduct;
 import com.synopsys.integration.util.NameVersion;
 import org.apache.commons.lang3.StringUtils;
@@ -40,16 +41,16 @@ public class PhoneHomeRequestBodyBuilder {
     private final List<String> artifactModules = new ArrayList<>();
     private final Map<String, String> metaData = new HashMap<>();
 
-    public static PhoneHomeRequestBodyBuilder createForBlackDuck(String integrationRepoName, String registrationId, String blackDuckServerUrl, String integrationVersion, String blackDuckVersion) {
+    public static PhoneHomeRequestBodyBuilder createForBlackDuck(String integrationRepoName, String registrationId, String blackDuckServerUrl, @Nullable String integrationVersion, @Nullable String blackDuckVersion) {
         return createForProduct(UniquePhoneHomeProduct.BLACK_DUCK, integrationRepoName, registrationId, blackDuckServerUrl, integrationVersion, blackDuckVersion);
     }
 
-    public static PhoneHomeRequestBodyBuilder createForCoverity(String integrationRepoName, String customerName, String cimServerUrl, String integrationVersion, String cimVersion) {
+    public static PhoneHomeRequestBodyBuilder createForCoverity(String integrationRepoName, String customerName, String cimServerUrl, @Nullable String integrationVersion, @Nullable String cimVersion) {
         return createForProduct(UniquePhoneHomeProduct.COVERITY, integrationRepoName, customerName, cimServerUrl, integrationVersion, cimVersion);
     }
 
-    public static PhoneHomeRequestBodyBuilder createForPolaris(String integrationRepoName, String registrationId, String polarisServerUrl, String integrationVersion, String polarisVersion) {
-        return createForProduct(UniquePhoneHomeProduct.POLARIS, integrationRepoName, registrationId, polarisServerUrl, integrationVersion, polarisVersion);
+    public static PhoneHomeRequestBodyBuilder createForPolaris(String integrationRepoName, String organizationName, String polarisServerUrl, @Nullable String integrationVersion, @Nullable String polarisVersion) {
+        return createForProduct(UniquePhoneHomeProduct.POLARIS, integrationRepoName, organizationName, polarisServerUrl, integrationVersion, polarisVersion);
     }
 
     public static PhoneHomeRequestBodyBuilder createForProduct(UniquePhoneHomeProduct product, String artifactId, String customerId, String hostName, String artifactVersion, String productVersion) {
@@ -60,15 +61,12 @@ public class PhoneHomeRequestBodyBuilder {
         return new PhoneHomeRequestBodyBuilder(customerId, hostName, artifactInfo, product, productVersion);
     }
 
-    private static String getVersionWithDefault(String version) {
-        return StringUtils.defaultIfEmpty(version, UNKNOWN_FIELD_VALUE);
-    }
-
     public PhoneHomeRequestBodyBuilder(String customerId, String hostName, NameVersion artifactInfo, UniquePhoneHomeProduct product, String productVersion) {
         if (null == product || null == artifactInfo || StringUtils.isAnyBlank(customerId, hostName, artifactInfo.getName(), artifactInfo.getVersion(), product.getName(), productVersion)) {
             throw new IllegalArgumentException("The fields: customerId, hostName, artifactInfo, and product (with a non-blank name), and productVersion are all required.");
         }
 
+        assert customerId != null;
         this.customerId = customerId;
         this.hostName = hostName;
         this.artifactInfo = artifactInfo;
